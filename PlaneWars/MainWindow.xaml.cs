@@ -24,5 +24,10 @@ namespace PlaneWars
         {
             InitializeComponent();
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            PlayerPlane player = new PlayerPlane(playerImage);
+        }
     }
 }

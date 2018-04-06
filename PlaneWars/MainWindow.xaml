@@ -5,8 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PlaneWars"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="800" MaxHeight="800" MinHeight="800" Width="540" MaxWidth="540" MinWidth="540"
+        Loaded="Window_Loaded">
     <Grid>
-        
+        <Image Source="Images/background.png" Stretch="Uniform" />
+        <Canvas Name="mainScene">
+            <Image Name="playerImage" Canvas.Top="50" Canvas.Left="430" />
+        </Canvas>
     </Grid>
 </Window>
