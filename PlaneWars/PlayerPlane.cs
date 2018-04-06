@@ -14,28 +14,43 @@ namespace PlaneWars
     {
         private Image playerImage;
 
-        public BitmapImage NormalImage1 { get; private set; }
-        public BitmapImage NormalImage2 { get; private set; }
-        public BitmapImage[] DestroyImages { get; private set; }
+        private BitmapImage[] normalImages;
+        private BitmapImage[] destroyImages;
+
+        private int imageIndex;
+        
+        private DateTime lastShootTime;
+
+        public BulletKind BulletKind { get; set; }
+        public double Top { get { return Canvas.GetTop(playerImage); } }
+        public double Left { get { return Canvas.GetLeft(playerImage); } }
+        public double Width { get { return playerImage.Width; } }
+        public double Height { get { return playerImage.Height; } }
 
         public PlayerPlane(Image playerImage)
         {
+            imageIndex = 0;
+            this.BulletKind = BulletKind.Bullet1;
+            lastShootTime = DateTime.Now;
+
             this.playerImage = playerImage;
 
             // Load normal images and show.
-            this.NormalImage1 = new BitmapImage(new Uri("Images/me1.png", UriKind.Relative));
-            this.NormalImage2 = new BitmapImage(new Uri("Images/me2.png", UriKind.Relative));
-            playerImage.Source = this.NormalImage1;
-            playerImage.Width = this.NormalImage1.Width * Settings.PlayerScaleFactor;
-            playerImage.Height = this.NormalImage1.Height * Settings.PlayerScaleFactor;
+            normalImages = new BitmapImage[2];
+            normalImages[0] = new BitmapImage(new Uri("Images/me1.png", UriKind.Relative));
+            normalImages[1] = new BitmapImage(new Uri("Images/me2.png", UriKind.Relative));
+            playerImage.Source = normalImages[0];
+            playerImage.Width = normalImages[0].Width * Settings.PlayerScaleFactor;
+            playerImage.Height = normalImages[0].Height * Settings.PlayerScaleFactor;
+            Canvas.SetTop(playerImage, Settings.PlayerTopMax);
+            Canvas.SetLeft(playerImage, (Settings.PlayerLeftMin + Settings.PlayerLeftMax) / 2);
 
             // Load destroy images.
-            this.DestroyImages = new BitmapImage[4];
-            this.DestroyImages[0] = new BitmapImage(new Uri("Images/me_destroy_1.png", UriKind.Relative));
-            this.DestroyImages[1] = new BitmapImage(new Uri("Images/me_destroy_2.png", UriKind.Relative));
-            this.DestroyImages[2] = new BitmapImage(new Uri("Images/me_destroy_3.png", UriKind.Relative));
-            this.DestroyImages[3] = new BitmapImage(new Uri("Images/me_destroy_4.png", UriKind.Relative));
-
+            destroyImages = new BitmapImage[4];
+            destroyImages[0] = new BitmapImage(new Uri("Images/me_destroy_1.png", UriKind.Relative));
+            destroyImages[1] = new BitmapImage(new Uri("Images/me_destroy_2.png", UriKind.Relative));
+            destroyImages[2] = new BitmapImage(new Uri("Images/me_destroy_3.png", UriKind.Relative));
+            destroyImages[3] = new BitmapImage(new Uri("Images/me_destroy_4.png", UriKind.Relative));
 
         }
 
@@ -43,8 +58,74 @@ namespace PlaneWars
         {
             double top = Canvas.GetTop(playerImage);
             double nextTop = top - Settings.PlayerSpeed;
-            nextTop = nextTop <= Settings.PlayerTopMin ? nextTop : Settings.PlayerTopMin;
+            nextTop = nextTop >= Settings.PlayerTopMin ? nextTop : Settings.PlayerTopMin;
+            Canvas.SetTop(playerImage, nextTop);
+        }
 
+        public void MoveDown()
+        {
+            double top = Canvas.GetTop(playerImage);
+            double nextTop = top + Settings.PlayerSpeed;
+            nextTop = nextTop <= Settings.PlayerTopMax ? nextTop : Settings.PlayerTopMax;
+            Canvas.SetTop(playerImage, nextTop);
+        }
+
+        public void MoveLeft()
+        {
+            double left = Canvas.GetLeft(playerImage);
+            double nextLeft = left - Settings.PlayerSpeed;
+            nextLeft = nextLeft >= Settings.PlayerLeftMin ? nextLeft : Settings.PlayerLeftMin;
+            Canvas.SetLeft(playerImage, nextLeft);
+        }
+
+        public void MoveRight()
+        {
+            double left = Canvas.GetLeft(playerImage);
+            double nextLeft = left + Settings.PlayerSpeed;
+            nextLeft = nextLeft <= Settings.PlayerLeftMax ? nextLeft : Settings.PlayerLeftMax;
+            Canvas.SetLeft(playerImage, nextLeft);
+        }
+
+        public void SwitchNormalImage()
+        {
+            imageIndex++;
+            imageIndex = imageIndex % normalImages.Length;
+            playerImage.Source = normalImages[imageIndex];
+        }
+
+        public void Shoot(Canvas mainScene, LinkedList<Image> bullets)
+        {
+            DateTime now = DateTime.Now;
+
+            if (now - lastShootTime < Settings.PlayerShootInterval)
+                return;
+
+            lastShootTime = now;
+            if (this.BulletKind == BulletKind.Bullet1)
+            {
+                Image bulletImage = new Image();
+                bulletImage.Source = Settings.Bullet1;
+                Canvas.SetLeft(bulletImage, this.Left + this.Width / 2);
+                Canvas.SetTop(bulletImage, this.Top + Settings.BulletVerticalOffset);
+                bullets.AddLast(bulletImage);
+                mainScene.Children.Add(bulletImage);
+            }
+            else
+            {
+                Image bulletImage = new Image();
+                bulletImage.Source = Settings.Bullet2;
+                Canvas.SetLeft(bulletImage, this.Left + this.Width / 2 + Settings.Bullet2LeftHorizontalOffset);
+                Canvas.SetTop(bulletImage, this.Top + Settings.BulletVerticalOffset);
+                bullets.AddLast(bulletImage);
+                mainScene.Children.Add(bulletImage);
+
+                bulletImage = new Image();
+                bulletImage.Source = Settings.Bullet2;
+                Canvas.SetLeft(bulletImage, this.Left + this.Width / 2 + Settings.Bullet2RightHorizontalOffset);
+                Canvas.SetTop(bulletImage, this.Top + Settings.BulletVerticalOffset);
+                bullets.AddLast(bulletImage);
+                mainScene.Children.Add(bulletImage);
+            }
         }
     }
 }
