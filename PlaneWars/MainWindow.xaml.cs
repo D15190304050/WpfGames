@@ -37,6 +37,7 @@ namespace PlaneWars
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             player = new PlayerPlane(playerImage);
+            player.BulletKind = BulletKind.Bullet2;
             timer.Start();
         }
 

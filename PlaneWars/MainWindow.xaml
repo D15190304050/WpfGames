@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PlaneWars"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" MaxHeight="800" MinHeight="800" Width="540" MaxWidth="540" MinWidth="540"
+        Title="Plane Wars" Height="800" MaxHeight="800" MinHeight="800" Width="540" MaxWidth="540" MinWidth="540"
         Loaded="Window_Loaded"
         Closing="Window_Closing">
     <Grid>
