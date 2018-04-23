@@ -15,6 +15,10 @@ namespace PlaneWars
         protected Image enemyImage;
         public int HP { get; set; }
         private double speed;
+        private EnemyKind enemyKind;
+        private BitmapImage[] destroyImages;
+
+        public double Top { get { return Canvas.GetTop(enemyImage); } }
 
         protected static BitmapImage SmallEnemyImage { get; private set; }
         protected static BitmapImage[] SmallEnemyDestroyImages { get; private set; }
@@ -23,7 +27,7 @@ namespace PlaneWars
 
         protected static BitmapImage[] MiddleEnemyDestroyImages { get; private set; }
 
-        protected static BitmapImage LargeEnemy { get; private set; }
+        protected static BitmapImage LargeEnemyImage { get; private set; }
 
         protected static BitmapImage[] LargeEnemyDestroyImages { get; private set; }
 
@@ -44,14 +48,48 @@ namespace PlaneWars
             Enemy.MiddleEnemyDestroyImages[2] = new BitmapImage(new Uri("Images/enemy2_down3.png", UriKind.Relative));
             Enemy.MiddleEnemyDestroyImages[3] = new BitmapImage(new Uri("Images/enemy2_down4.png", UriKind.Relative));
 
-            Enemy.LargeEnemy = new BitmapImage(new Uri("Images/enemy3.png", UriKind.Relative));
+            Enemy.LargeEnemyImage = new BitmapImage(new Uri("Images/enemy3.png", UriKind.Relative));
             Enemy.LargeEnemyDestroyImages[0] = new BitmapImage(new Uri("Images/enemy3_down1.png", UriKind.Relative));
             Enemy.LargeEnemyDestroyImages[1] = new BitmapImage(new Uri("Images/enemy3_down2.png", UriKind.Relative));
             Enemy.LargeEnemyDestroyImages[2] = new BitmapImage(new Uri("Images/enemy3_down3.png", UriKind.Relative));
             Enemy.LargeEnemyDestroyImages[3] = new BitmapImage(new Uri("Images/enemy3_down4.png", UriKind.Relative));
         }
 
+        public Enemy(EnemyKind enemyKind, double startX)
+        {
+            if (enemyKind == EnemyKind.SmallEnemy)
+            {
+                destroyImages = SmallEnemyDestroyImages;
+                enemyImage.Source = SmallEnemyImage;
+                speed = Settings.EnemyInitialSpeed;
+                this.HP = Settings.SmallEnemyInitialHP;
+            }
+            else if (enemyKind == EnemyKind.MiddleEnemy)
+            {
+                destroyImages = MiddleEnemyDestroyImages;
+                enemyImage.Source = MiddleEnemyImage;
+                speed = Settings.EnemyInitialSpeed;
+                this.HP = Settings.MiddleEnemyInitialHP;
+            }
+            else
+            {
+                destroyImages = LargeEnemyDestroyImages;
+                enemyImage.Source = LargeEnemyImage;
+                speed = Settings.EnemyInitialSpeed;
+                this.HP = Settings.LargeEnemyInitialHP;
+            }
+
+            this.enemyKind = enemyKind;
+            Canvas.SetLeft(enemyImage, startX);
+            Canvas.SetTop(enemyImage, Settings.EnemyStartY);
+        }
+
         public void MoveDown()
+        {
+            Canvas.SetTop(enemyImage, this.Top + speed);
+        }
+
+        public void Update()
         {
 
         }

@@ -24,12 +24,14 @@ namespace PlaneWars
         private Timer timer;
         private PlayerPlane player;
         private LinkedList<Image> bullets;
+        private LinkedList<Enemy> enemies;
 
         public MainWindow()
         {
             timer = new Timer(15);
             timer.Elapsed += ElapsedHandler;
             bullets = new LinkedList<Image>();
+            enemies = new LinkedList<Enemy>();
 
             InitializeComponent();
         }
@@ -112,6 +114,11 @@ namespace PlaneWars
                 bullets.Remove(bullet);
                 mainScene.Children.Remove(bullet);
             }
+        }
+
+        private void GenerateEnemy(EnemyKind enemyKind)
+        {
+
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

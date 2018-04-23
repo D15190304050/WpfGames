@@ -57,6 +57,7 @@
     <Compile Include="BulletKind.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="EnemyKind.cs" />
+    <Compile Include="EnemyType.cs" />
     <Compile Include="Settings.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
