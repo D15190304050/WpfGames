@@ -12,6 +12,11 @@
         <Image Source="Images/background.png" Stretch="Uniform" />
         <Canvas Name="mainScene">
             <Image Name="playerImage" />
+            <Image Source="Images/enemy1.png" />
+            <Rectangle Canvas.Left="33" Canvas.Top="8" Width="11" Height="39" Stroke="Blue" StrokeThickness="1" />
+            <Ellipse Canvas.Left="33" Canvas.Top="40" Width="11" Height="11" Stroke="Red" StrokeThickness="1" />
+            <Polygon Stroke="Red" StrokeThickness="1" Points="5,20 34,20 34,48" />
+            <Polygon Stroke="Red" StrokeThickness="1" Points="73,20 44,20 44,48" />
         </Canvas>
     </Grid>
 </Window>

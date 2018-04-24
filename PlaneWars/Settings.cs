@@ -40,6 +40,11 @@ namespace PlaneWars
         // Constants for SmallEnemy.
         public const int SmallEnemyInitialHP = 1;
         public const int SmallEnemyLeftMax = 450;
+        public const double SmallRectangleColliderLeftOffset = 33;
+        public const double SmallRectangleColliderTopOffset = 8;
+        public const double SmallRectangleColliderWidth = 11;
+        public const double SmallRectangleColliderHeight = 39;
+        public const double SmallCircleColliderCenterX = 38.5;
 
         // Constants for MiddleEnemy.
         public const int MiddleEnemyInitialHP = 8;

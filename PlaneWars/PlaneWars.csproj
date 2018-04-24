@@ -55,9 +55,13 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BulletKind.cs" />
+    <Compile Include="Circle.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="EnemyKind.cs" />
     <Compile Include="EnemyType.cs" />
+    <Compile Include="ICollide.cs" />
+    <Compile Include="Point.cs" />
+    <Compile Include="Rectangle.cs" />
     <Compile Include="Settings.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
