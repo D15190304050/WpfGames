@@ -31,19 +31,23 @@ namespace PlaneWars
         public static BitmapImage Bullet1 { get; }
         public static BitmapImage Bullet2 { get; }
 
+        // Common constants for enemies.
         public const double EnemyStartY = -5;
-        public const int EnemyInitialSpeed = 1;
+        public const double EnemyInitialSpeed = 2;
+        public const int EnemyLeftMin = 0;
+        public const int EnemyTopMax = 770;
 
         // Constants for SmallEnemy.
         public const int SmallEnemyInitialHP = 1;
         public const int SmallEnemyLeftMax = 450;
-        public const int SmallEnemyTopMax = 750;
 
         // Constants for MiddleEnemy.
         public const int MiddleEnemyInitialHP = 8;
+        public const int MiddleEnemyLeftMax = 440;
 
         // Constants for LargeEnemy.
         public const int LargeEnemyInitialHP = 20;
+        public const int LargeEnemyLeftMax = 308;
 
         static Settings()
         {

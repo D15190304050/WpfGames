@@ -12,7 +12,6 @@
         <Image Source="Images/background.png" Stretch="Uniform" />
         <Canvas Name="mainScene">
             <Image Name="playerImage" />
-            <Image Source="Images/enemy1.png" Canvas.Top="750" Canvas.Left="450" />
         </Canvas>
     </Grid>
 </Window>

@@ -25,6 +25,7 @@ namespace PlaneWars
         private PlayerPlane player;
         private LinkedList<Image> bullets;
         private LinkedList<Enemy> enemies;
+        private Random random;
 
         public MainWindow()
         {
@@ -32,6 +33,7 @@ namespace PlaneWars
             timer.Elapsed += ElapsedHandler;
             bullets = new LinkedList<Image>();
             enemies = new LinkedList<Enemy>();
+            random = new Random();
 
             InitializeComponent();
         }
@@ -39,8 +41,11 @@ namespace PlaneWars
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             player = new PlayerPlane(playerImage);
-            player.BulletKind = BulletKind.Bullet2;
+            player.BulletKind = BulletKind.Bullet1;
             timer.Start();
+
+            GenerateEnemy(EnemyKind.SmallEnemy);
+
         }
 
         private void ElapsedHandler(object sender, ElapsedEventArgs e)
@@ -53,7 +58,8 @@ namespace PlaneWars
             PlayerMove();
             player.SwitchNormalImage();
             player.Shoot(mainScene, bullets);
-            BulletUpdate();
+            BulletsUpdate();
+            EnemiesUpdate();
         }
 
         private void PlayerMove()
@@ -88,23 +94,19 @@ namespace PlaneWars
                 player.MoveRight();
         }
 
-        private void BulletUpdate()
+        private void BulletsUpdate()
         {
             BulletMoveUp();
-            RemoveOutBullets();
         }
 
         private void BulletMoveUp()
         {
-            foreach (Image bullet in bullets)
-                Canvas.SetTop(bullet, Canvas.GetTop(bullet) - Settings.BulletSpeed);
-        }
-
-        private void RemoveOutBullets()
-        {
             LinkedList<Image> bulletsToRemove = new LinkedList<Image>();
+
             foreach (Image bullet in bullets)
             {
+                Canvas.SetTop(bullet, Canvas.GetTop(bullet) - Settings.BulletSpeed);
+
                 if (Canvas.GetTop(bullet) < 0)
                     bulletsToRemove.AddLast(bullet);
             }
@@ -118,7 +120,47 @@ namespace PlaneWars
 
         private void GenerateEnemy(EnemyKind enemyKind)
         {
+            int leftMax = 0;
+            switch (enemyKind)
+            {
+                case EnemyKind.SmallEnemy:
+                    leftMax = Settings.SmallEnemyLeftMax;
+                    break;
+                case EnemyKind.MiddleEnemy:
+                    leftMax = Settings.MiddleEnemyLeftMax;
+                    break;
+                case EnemyKind.LargeEnemy:
+                    leftMax = Settings.LargeEnemyLeftMax;
+                    break;
+            }
+            int startX = random.Next(Settings.EnemyLeftMin, leftMax);
+            Enemy enemy = new Enemy(enemyKind, startX);
+            enemies.AddLast(enemy);
+            mainScene.Children.Add(enemy.EnemyImage);
+        }
 
+        private void EnemiesUpdate()
+        {
+            EnemiesMoveDown();
+        }
+
+        private void EnemiesMoveDown()
+        {
+            LinkedList<Enemy> enemiesToRemove = new LinkedList<Enemy>();
+
+            foreach (Enemy e in enemies)
+            {
+                e.MoveDown();
+
+                if (e.Top > Settings.EnemyTopMax)
+                    enemiesToRemove.AddLast(e);
+            }
+
+            foreach (Enemy e in enemiesToRemove)
+            {
+                enemies.Remove(e);
+                mainScene.Children.Remove(e.EnemyImage);
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
