@@ -8,8 +8,8 @@ namespace PlaneWars
 {
     public class Circle : ICollide
     {
-        public double CenterX { get; }
-        public double CenterY { get; }
+        public double CenterX { get; private set; }
+        public double CenterY { get; private set; }
         public double Radius { get; }
 
         public Circle(double centerX, double centerY, double radius)
@@ -36,7 +36,12 @@ namespace PlaneWars
             double deltaY = y - this.CenterY;
             double distanceSquare = deltaX * deltaX + deltaY * deltaY;
 
-            return distanceSquare < this.Radius * this.Radius;
+            return distanceSquare <= this.Radius * this.Radius;
+        }
+
+        public void MoveDown(double speed)
+        {
+            this.CenterY += speed;
         }
 
         public override string ToString()

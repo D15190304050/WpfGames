@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PlaneWars
 {
-    public class Rectangle : ICollide
+    public class Rectangle2D : ICollide
     {
         public double StartX { get; private set; }
         public double StartY { get; private set; }
@@ -16,7 +16,7 @@ namespace PlaneWars
         public double EndX { get; private set; }
         public double EndY { get; private set; }
 
-        public Rectangle(double startX, double startY, double width, double height)
+        public Rectangle2D(double startX, double startY, double width, double height)
         {
             this.StartX = startX;
             this.StartY = startY;
@@ -34,8 +34,8 @@ namespace PlaneWars
 
         public bool Collide(double x, double y)
         {
-            if ((this.StartX < x) && (x < this.EndX) &&
-                (this.StartY < y) && (y < this.EndY))
+            if ((this.StartX <= x) && (x <= this.EndX) &&
+                (this.StartY <= y) && (y <= this.EndY))
                 return true;
             else
                 return false;

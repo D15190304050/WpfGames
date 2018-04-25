@@ -163,6 +163,11 @@ namespace PlaneWars
             }
         }
 
+        private void EnemiesCollide()
+        {
+            
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             timer.Stop();

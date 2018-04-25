@@ -17,8 +17,10 @@ namespace PlaneWars
         private double speed;
         private EnemyKind enemyKind;
         private BitmapImage[] destroyImages;
+        private LinkedList<ICollide> colliders;
 
-        public double Top { get { return Canvas.GetTop(EnemyImage); } }
+        public double Top { get { return Canvas.GetTop(this.EnemyImage); } }
+        public double Left { get { return Canvas.GetLeft(this.EnemyImage); } }
 
         protected static BitmapImage SmallEnemyImage { get; private set; }
         protected static BitmapImage[] SmallEnemyDestroyImages { get; private set; }
@@ -58,42 +60,86 @@ namespace PlaneWars
 
         public Enemy(EnemyKind enemyKind, double startX)
         {
+            this.EnemyImage = new Image();
+            this.enemyKind = enemyKind;
+            Canvas.SetLeft(this.EnemyImage, startX);
+            Canvas.SetTop(this.EnemyImage, Settings.EnemyStartY);
+            colliders = new LinkedList<ICollide>();
+
             if (enemyKind == EnemyKind.SmallEnemy)
             {
                 destroyImages = SmallEnemyDestroyImages;
-                this.EnemyImage = new Image();
-                EnemyImage.Source = SmallEnemyImage;
+                this.EnemyImage.Source = SmallEnemyImage;
                 speed = Settings.EnemyInitialSpeed;
                 this.HP = Settings.SmallEnemyInitialHP;
+
+                double left = this.Left;
+                double top = this.Top;
+                Rectangle2D rectangleCollider = new Rectangle2D(left + Settings.SmallRectangleColliderLeftOffset,
+                                                                top + Settings.SmallRectangleColliderTopOffset,
+                                                                Settings.SmallRectangleColliderWidth,
+                                                                Settings.SmallRectangleColliderHeight);
+                Circle circleCollider = new Circle(left + Settings.SmallCircleColliderCenterXOffset,
+                                                   top + Settings.SmallCircleColliderCenterYOffset,
+                                                   Settings.SmallCircleColliderRadius);
+
+                Point2D p1 = new Point2D(left + Settings.SmallLeftTriangleVertex1XOffset,
+                                         top + Settings.SmallLeftTriangleVertex1YOffset);
+                Point2D p2 = new Point2D(left + Settings.SmallLeftTriangleVertex2XOffset,
+                                         top + Settings.SmallLeftTriangleVertex2YOffset);
+                Point2D p3 = new Point2D(left + Settings.SmallLeftTriangleVertex3XOffset,
+                                         top + Settings.SmallLeftTriangleVertex3YOffset);
+                Point2D p4 = new Point2D(left + Settings.SmallRightTriangleVertex1XOffset,
+                                         top + Settings.SmallRightTriangleVertex1YOffset);
+                Point2D p5 = new Point2D(left + Settings.SmallRightTriangleVertex2XOffset,
+                                         top + Settings.SmallRightTriangleVertex2YOffset);
+                Point2D p6 = new Point2D(left + Settings.SmallRightTriangleVertex3XOffset,
+                                         top + Settings.SmallRightTriangleVertex3YOffset);
+                Triangle2D leftTriangleCollider = new Triangle2D(p1, p2, p3);
+                Triangle2D rightTriangleCollider = new Triangle2D(p4, p5, p6);
+
+                colliders.AddLast(rectangleCollider);
+                colliders.AddLast(circleCollider);
+                colliders.AddLast(leftTriangleCollider);
+                colliders.AddLast(rightTriangleCollider);
             }
             else if (enemyKind == EnemyKind.MiddleEnemy)
             {
                 destroyImages = MiddleEnemyDestroyImages;
-                EnemyImage.Source = MiddleEnemyImage;
+                this.EnemyImage.Source = MiddleEnemyImage;
                 speed = Settings.EnemyInitialSpeed;
                 this.HP = Settings.MiddleEnemyInitialHP;
             }
             else
             {
                 destroyImages = LargeEnemyDestroyImages;
-                EnemyImage.Source = LargeEnemyImage;
+                this.EnemyImage.Source = LargeEnemyImage;
                 speed = Settings.EnemyInitialSpeed;
                 this.HP = Settings.LargeEnemyInitialHP;
             }
-
-            this.enemyKind = enemyKind;
-            Canvas.SetLeft(EnemyImage, startX);
-            Canvas.SetTop(EnemyImage, Settings.EnemyStartY);
         }
 
         public void MoveDown()
         {
-            Canvas.SetTop(EnemyImage, this.Top + speed);
+            // Move enemy plane image.
+            Canvas.SetTop(this.EnemyImage, this.Top + speed);
+
+            // Move its collider component.
+            foreach (ICollide collider in colliders)
+                collider.MoveDown(speed);
         }
 
-        public void Update()
+        public bool Collide(double x, double y)
         {
-
+            foreach (ICollide collider in colliders)
+            {
+                if (collider.Collide(x, y))
+                {
+                    MessageBox.Show("Collide");
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

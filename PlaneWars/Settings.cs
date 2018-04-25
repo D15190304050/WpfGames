@@ -27,6 +27,8 @@ namespace PlaneWars
         public const double BulletVerticalOffset = 20;
         public const double Bullet2LeftHorizontalOffset = -32;
         public const double Bullet2RightHorizontalOffset = 28;
+        public const double Bullet1WarheadTopOffset = 1;
+        public const double Bullet1WarheadLeftOffset = 3;
 
         public static BitmapImage Bullet1 { get; }
         public static BitmapImage Bullet2 { get; }
@@ -44,7 +46,21 @@ namespace PlaneWars
         public const double SmallRectangleColliderTopOffset = 8;
         public const double SmallRectangleColliderWidth = 11;
         public const double SmallRectangleColliderHeight = 39;
-        public const double SmallCircleColliderCenterX = 38.5;
+        public const double SmallCircleColliderCenterXOffset = 38.5;
+        public const double SmallCircleColliderCenterYOffset = 45.5;
+        public const double SmallCircleColliderRadius = 5.5;
+        public const double SmallLeftTriangleVertex1XOffset = 5;
+        public const double SmallLeftTriangleVertex1YOffset = 20;
+        public const double SmallLeftTriangleVertex2XOffset = 34;
+        public const double SmallLeftTriangleVertex2YOffset = 20;
+        public const double SmallLeftTriangleVertex3XOffset = 34;
+        public const double SmallLeftTriangleVertex3YOffset = 48;
+        public const double SmallRightTriangleVertex1XOffset = 73;
+        public const double SmallRightTriangleVertex1YOffset = 20;
+        public const double SmallRightTriangleVertex2XOffset = 44;
+        public const double SmallRightTriangleVertex2YOffset = 20;
+        public const double SmallRightTriangleVertex3XOffset = 44;
+        public const double SmallRightTriangleVertex3YOffset = 48;
 
         // Constants for MiddleEnemy.
         public const int MiddleEnemyInitialHP = 8;

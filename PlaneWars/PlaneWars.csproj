@@ -54,15 +54,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BulletBase.cs" />
     <Compile Include="BulletKind.cs" />
     <Compile Include="Circle.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="EnemyKind.cs" />
-    <Compile Include="EnemyType.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ICollide.cs" />
-    <Compile Include="Point.cs" />
-    <Compile Include="Rectangle.cs" />
+    <Compile Include="Line2D.cs" />
+    <Compile Include="LineSegment2D.cs" />
+    <Compile Include="Point2D.cs" />
+    <Compile Include="Rectangle2D.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Triangle2D.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

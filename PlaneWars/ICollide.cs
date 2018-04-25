@@ -9,5 +9,7 @@ namespace PlaneWars
     public interface ICollide
     {
         bool Collide(double x, double y);
+
+        void MoveDown(double speed);
     }
 }
