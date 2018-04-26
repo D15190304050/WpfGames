@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PlaneWars
 {
-    public class Rectangle2D : ICollide
+    public class Rectangle2D : ICollider
     {
         public double StartX { get; private set; }
         public double StartY { get; private set; }

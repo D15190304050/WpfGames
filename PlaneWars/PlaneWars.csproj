@@ -54,13 +54,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BulletBase.cs" />
+    <Compile Include="Bullet.cs" />
     <Compile Include="BulletKind.cs" />
     <Compile Include="Circle.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="EnemyKind.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="ICollide.cs" />
+    <Compile Include="ICollider.cs" />
     <Compile Include="Line2D.cs" />
     <Compile Include="LineSegment2D.cs" />
     <Compile Include="Point2D.cs" />

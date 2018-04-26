@@ -23,17 +23,26 @@ namespace PlaneWars
     {
         private Timer timer;
         private PlayerPlane player;
-        private LinkedList<Image> bullets;
         private LinkedList<Enemy> enemies;
+        private LinkedList<Bullet> bullets;
+        private LinkedList<Enemy> enemiesToRemove;
+        private LinkedList<Bullet> bulletsToRemove;
+        private LinkedList<Enemy> enemiesToDestroy;
         private Random random;
+        private int frameCount;
+        private bool running;
 
         public MainWindow()
         {
             timer = new Timer(15);
             timer.Elapsed += ElapsedHandler;
-            bullets = new LinkedList<Image>();
             enemies = new LinkedList<Enemy>();
+            bullets = new LinkedList<Bullet>();
             random = new Random();
+            bulletsToRemove = new LinkedList<Bullet>();
+            enemiesToRemove = new LinkedList<Enemy>();
+            enemiesToDestroy = new LinkedList<Enemy>();
+            running = true;
 
             InitializeComponent();
         }
@@ -42,10 +51,10 @@ namespace PlaneWars
         {
             player = new PlayerPlane(playerImage);
             player.BulletKind = BulletKind.Bullet1;
+
             timer.Start();
 
-            GenerateEnemy(EnemyKind.SmallEnemy);
-
+            //GenerateEnemy(EnemyKind.LargeEnemy);
         }
 
         private void ElapsedHandler(object sender, ElapsedEventArgs e)
@@ -60,6 +69,13 @@ namespace PlaneWars
             player.Shoot(mainScene, bullets);
             BulletsUpdate();
             EnemiesUpdate();
+
+            frameCount++;
+            if (frameCount % Settings.EnemyGenerationInterval1 == 0)
+                GenerateEnemy(EnemyKind.SmallEnemy);
+
+            CheckForPauseResume();
+            CheckForRestart();
         }
 
         private void PlayerMove()
@@ -101,20 +117,20 @@ namespace PlaneWars
 
         private void BulletMoveUp()
         {
-            LinkedList<Image> bulletsToRemove = new LinkedList<Image>();
+            LinkedList<Bullet> bulletsToRemove = new LinkedList<Bullet>();
 
-            foreach (Image bullet in bullets)
+            foreach (Bullet bullet in bullets)
             {
-                Canvas.SetTop(bullet, Canvas.GetTop(bullet) - Settings.BulletSpeed);
+                bullet.MoveUp();
 
-                if (Canvas.GetTop(bullet) < 0)
-                    bulletsToRemove.AddLast(bullet);
+                if (bullet.Top < 0)
+                    bulletsToRemove.AddFirst(bullet);
             }
 
-            foreach (Image bullet in bulletsToRemove)
+            foreach (Bullet bullet in bulletsToRemove)
             {
                 bullets.Remove(bullet);
-                mainScene.Children.Remove(bullet);
+                mainScene.Children.Remove(bullet.BulletImage);
             }
         }
 
@@ -135,13 +151,17 @@ namespace PlaneWars
             }
             int startX = random.Next(Settings.EnemyLeftMin, leftMax);
             Enemy enemy = new Enemy(enemyKind, startX);
-            enemies.AddLast(enemy);
+            enemies.AddFirst(enemy);
             mainScene.Children.Add(enemy.EnemyImage);
         }
 
         private void EnemiesUpdate()
         {
             EnemiesMoveDown();
+            EnemiesCollide();
+            
+            if (enemiesToDestroy.Count > 0)
+                EnemiesDestroy();
         }
 
         private void EnemiesMoveDown()
@@ -153,7 +173,7 @@ namespace PlaneWars
                 e.MoveDown();
 
                 if (e.Top > Settings.EnemyTopMax)
-                    enemiesToRemove.AddLast(e);
+                    enemiesToRemove.AddFirst(e);
             }
 
             foreach (Enemy e in enemiesToRemove)
@@ -165,7 +185,149 @@ namespace PlaneWars
 
         private void EnemiesCollide()
         {
-            
+            EnemiesCollideWithBullets();
+            EnemiesCollideWithPlayer();
+        }
+
+        private void EnemiesCollideWithBullets()
+        {
+            bulletsToRemove.Clear();
+            enemiesToRemove.Clear();
+
+            foreach (Enemy enemy in enemies)
+            {
+                foreach (Bullet bullet in bullets)
+                {
+                    if (enemy.Collide(bullet.WarheadX, bullet.WarheadY))
+                    {
+                        enemy.HP--;
+                        bulletsToRemove.AddLast(bullet);
+                    }
+                }
+
+                foreach (Bullet bullet in bulletsToRemove)
+                {
+                    bullets.Remove(bullet);
+                    mainScene.Children.Remove(bullet.BulletImage);
+                }
+
+                if (enemy.HP <= 0)
+                    enemiesToRemove.AddLast(enemy);
+            }
+
+            foreach (Enemy enemy in enemiesToRemove)
+            {
+                enemies.Remove(enemy);
+                enemiesToDestroy.AddLast(enemy);
+            }
+        }
+
+        private void EnemiesCollideWithPlayer()
+        {
+            Enemy collidedEnemy = null;
+            bool collided = false;
+
+            foreach (Enemy enemy in enemies)
+            {
+                foreach (Point2D p in player.CollisionPoints)
+                {
+                    if (enemy.Collide(p.X, p.Y))
+                    {
+                        player.HP = 0;
+
+                        Rectangle r = new Rectangle();
+                        Canvas.SetLeft(r, p.X);
+                        Canvas.SetTop(r, p.Y);
+                        r.Stroke = Brushes.Red;
+                        r.StrokeThickness = 2;
+                        r.Width = 20;
+                        r.Height = 20;
+                        mainScene.Children.Add(r);
+
+                        mainScene.Children.Remove(playerImage);
+                        collidedEnemy = enemy;
+                        collidedEnemy.HP = 0;
+
+                        collided = true;
+                        enemiesToDestroy.AddLast(collidedEnemy);
+                        break;
+                    }
+                }
+
+                if (collided)
+                    break;
+            }
+
+            enemies.Remove(collidedEnemy);
+        }
+
+        private void EnemiesDestroy()
+        {
+            enemiesToRemove.Clear();
+            foreach (Enemy enemy in enemiesToDestroy)
+            {
+                if (enemy.CanRemove)
+                    enemiesToRemove.AddLast(enemy);
+                else
+                    enemy.Destroy();
+            }
+
+            foreach (Enemy enemy in enemiesToRemove)
+            {
+                enemiesToDestroy.Remove(enemy);
+                mainScene.Children.Remove(enemy.EnemyImage);
+            }
+        }
+
+        private void CheckForPauseResume()
+        {
+            if (Keyboard.IsKeyDown(Key.P))
+            {
+                System.Diagnostics.Debug.WriteLine("Pressed");
+
+                if (running)
+                {
+                    running = false;
+
+                    timer.Stop();
+                    timer = new Timer(15);
+                    timer.Elapsed += ElapsedHandler;
+                }
+                else
+                {
+                    running = true;
+                    timer.Start();
+                }
+            }
+        }
+
+        private void Restart()
+        {
+            timer.Stop();
+            timer = new Timer(15);
+            timer.Elapsed += ElapsedHandler;
+
+            enemies.Clear();
+            bullets.Clear();
+            enemiesToRemove.Clear();
+            bulletsToRemove.Clear();
+            enemiesToDestroy.Clear();
+            random = new Random();
+            frameCount = 0;
+            mainScene.Children.Clear();
+
+            running = true;
+            mainScene.Children.Add(playerImage);
+            player = new PlayerPlane(playerImage);
+            player.BulletKind = BulletKind.Bullet1;
+
+            timer.Start();
+        }
+
+        private void CheckForRestart()
+        {
+            if (player.HP == 0)
+                Restart();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

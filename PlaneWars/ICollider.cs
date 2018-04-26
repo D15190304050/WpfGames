@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PlaneWars
 {
-    public interface ICollide
+    public interface ICollider
     {
         bool Collide(double x, double y);
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PlaneWars
 {
-    public class Circle : ICollide
+    public class Circle : ICollider
     {
         public double CenterX { get; private set; }
         public double CenterY { get; private set; }

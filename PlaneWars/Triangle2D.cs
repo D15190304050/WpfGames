@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PlaneWars
 {
-    public class Triangle2D : ICollide
+    public class Triangle2D : ICollider
     {
         public Point2D Vertex1 { get; }
         public Point2D Vertex2 { get; }
@@ -27,14 +27,14 @@ namespace PlaneWars
             LineSegment2D lineSegment2 = new LineSegment2D(this.Vertex1, this.Vertex3);
             LineSegment2D lineSegment3 = new LineSegment2D(this.Vertex2, this.Vertex3);
 
-            // Get the horizontal line accross the given point.
-            Line2D horizontalLine = new Line2D(0, 1, -y);
-
             // Return true if there is a line segment of this triangle that contains the given point.
             if ((lineSegment1.Contains(x, y)) ||
                 (lineSegment2.Contains(x, y)) ||
                 (lineSegment3.Contains(x, y)))
                 return true;
+
+            // Get the horizontal line accross the given point.
+            Line2D horizontalLine = new Line2D(0, 1, -y);
 
             // Switch references of Line objects to make sure that if there is a horizontal line that contains some segment of this triangle, then it must be line1.
             if (lineSegment2.A == 0)

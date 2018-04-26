@@ -19,7 +19,7 @@ namespace PlaneWars
 
         private int imageIndex;
         
-        private DateTime lastShootTime;
+        private int timer;
 
         public BulletKind BulletKind { get; set; }
         public double Top { get { return Canvas.GetTop(playerImage); } }
@@ -27,11 +27,21 @@ namespace PlaneWars
         public double Width { get { return playerImage.Width; } }
         public double Height { get { return playerImage.Height; } }
 
+        public int HP { get; set; }
+
+        /// <summary>
+        /// Points for collision detection.
+        /// </summary>
+        private List<Point2D> collisionPoints;
+
+        public IEnumerable<Point2D> CollisionPoints { get { return collisionPoints; } }
+
         public PlayerPlane(Image playerImage)
         {
             imageIndex = 0;
+            timer = 0;
+            this.HP = Settings.PlayerInitialHP;
             this.BulletKind = BulletKind.Bullet1;
-            lastShootTime = DateTime.Now;
 
             this.playerImage = playerImage;
 
@@ -52,6 +62,15 @@ namespace PlaneWars
             destroyImages[2] = new BitmapImage(new Uri("Images/me_destroy_3.png", UriKind.Relative));
             destroyImages[3] = new BitmapImage(new Uri("Images/me_destroy_4.png", UriKind.Relative));
 
+            collisionPoints = new List<Point2D>();
+            collisionPoints.Add(new Point2D(this.Left + Settings.PlayerCollisionPoint1XOffset, this.Top + Settings.PlayerCollisionPoint1YOffset));
+            collisionPoints.Add(new Point2D(this.Left + Settings.PlayerCollisionPoint2XOffset, this.Top + Settings.PlayerCollisionPoint2YOffset));
+            collisionPoints.Add(new Point2D(this.Left + Settings.PlayerCollisionPoint3XOffset, this.Top + Settings.PlayerCollisionPoint3YOffset));
+            collisionPoints.Add(new Point2D(this.Left + Settings.PlayerCollisionPoint4XOffset, this.Top + Settings.PlayerCollisionPoint4YOffset));
+            collisionPoints.Add(new Point2D(this.Left + Settings.PlayerCollisionPoint5XOffset, this.Top + Settings.PlayerCollisionPoint5YOffset));
+            collisionPoints.Add(new Point2D(this.Left + Settings.PlayerCollisionPoint6XOffset, this.Top + Settings.PlayerCollisionPoint6YOffset));
+            collisionPoints.Add(new Point2D(this.Left + Settings.PlayerCollisionPoint7XOffset, this.Top + Settings.PlayerCollisionPoint7YOffset));
+            collisionPoints.Add(new Point2D(this.Left + Settings.PlayerCollisionPoint8XOffset, this.Top + Settings.PlayerCollisionPoint8YOffset));
         }
 
         public void MoveUp()
@@ -60,6 +79,8 @@ namespace PlaneWars
             double nextTop = top - Settings.PlayerSpeed;
             nextTop = nextTop >= Settings.PlayerTopMin ? nextTop : Settings.PlayerTopMin;
             Canvas.SetTop(playerImage, nextTop);
+
+            UpdateCollisionPoints();
         }
 
         public void MoveDown()
@@ -68,6 +89,8 @@ namespace PlaneWars
             double nextTop = top + Settings.PlayerSpeed;
             nextTop = nextTop <= Settings.PlayerTopMax ? nextTop : Settings.PlayerTopMax;
             Canvas.SetTop(playerImage, nextTop);
+
+            UpdateCollisionPoints();
         }
 
         public void MoveLeft()
@@ -76,6 +99,8 @@ namespace PlaneWars
             double nextLeft = left - Settings.PlayerSpeed;
             nextLeft = nextLeft >= Settings.PlayerLeftMin ? nextLeft : Settings.PlayerLeftMin;
             Canvas.SetLeft(playerImage, nextLeft);
+
+            UpdateCollisionPoints();
         }
 
         public void MoveRight()
@@ -84,6 +109,38 @@ namespace PlaneWars
             double nextLeft = left + Settings.PlayerSpeed;
             nextLeft = nextLeft <= Settings.PlayerLeftMax ? nextLeft : Settings.PlayerLeftMax;
             Canvas.SetLeft(playerImage, nextLeft);
+
+            UpdateCollisionPoints();
+        }
+
+        /// <summary>
+        /// Updates collision points after player moves this plane.
+        /// </summary>
+        public void UpdateCollisionPoints()
+        {
+            collisionPoints[0].X = this.Left + Settings.PlayerCollisionPoint1XOffset;
+            collisionPoints[0].Y = this.Top + Settings.PlayerCollisionPoint1YOffset;
+
+            collisionPoints[1].X = this.Left + Settings.PlayerCollisionPoint2XOffset;
+            collisionPoints[1].Y = this.Top + Settings.PlayerCollisionPoint2YOffset;
+
+            collisionPoints[2].X = this.Left + Settings.PlayerCollisionPoint3XOffset;
+            collisionPoints[2].Y = this.Top + Settings.PlayerCollisionPoint3YOffset;
+
+            collisionPoints[3].X = this.Left + Settings.PlayerCollisionPoint4XOffset;
+            collisionPoints[3].Y = this.Top + Settings.PlayerCollisionPoint4YOffset;
+
+            collisionPoints[4].X = this.Left + Settings.PlayerCollisionPoint5XOffset;
+            collisionPoints[4].Y = this.Top + Settings.PlayerCollisionPoint5YOffset;
+
+            collisionPoints[5].X = this.Left + Settings.PlayerCollisionPoint6XOffset;
+            collisionPoints[5].Y = this.Top + Settings.PlayerCollisionPoint6YOffset;
+
+            collisionPoints[6].X = this.Left + Settings.PlayerCollisionPoint7XOffset;
+            collisionPoints[6].Y = this.Top + Settings.PlayerCollisionPoint7YOffset;
+
+            collisionPoints[7].X = this.Left + Settings.PlayerCollisionPoint8XOffset;
+            collisionPoints[7].Y = this.Top + Settings.PlayerCollisionPoint8YOffset;
         }
 
         public void SwitchNormalImage()
@@ -93,38 +150,39 @@ namespace PlaneWars
             playerImage.Source = normalImages[imageIndex];
         }
 
-        public void Shoot(Canvas mainScene, LinkedList<Image> bullets)
+        public void Shoot(Canvas mainScene, LinkedList<Bullet> bullets)
         {
-            DateTime now = DateTime.Now;
-
-            if (now - lastShootTime < Settings.PlayerShootInterval)
+            timer++;
+            if (timer % Settings.PlayerShootInterval != 0)
                 return;
-
-            lastShootTime = now;
+            
             if (this.BulletKind == BulletKind.Bullet1)
             {
-                Image bulletImage = new Image();
-                bulletImage.Source = Settings.Bullet1;
-                Canvas.SetLeft(bulletImage, this.Left + this.Width / 2);
-                Canvas.SetTop(bulletImage, this.Top + Settings.BulletVerticalOffset);
-                bullets.AddLast(bulletImage);
-                mainScene.Children.Add(bulletImage);
+                double startX = this.Left + this.Width / 2;
+                double startY = this.Top + Settings.BulletVerticalOffset;
+                Bullet bullet = new Bullet(startX, startY, BulletKind.Bullet1);
+                mainScene.Children.Add(bullet.BulletImage);
+                Canvas.SetLeft(bullet.BulletImage, startX);
+                Canvas.SetTop(bullet.BulletImage, startY);
+                bullets.AddLast(bullet);
             }
             else
             {
-                Image bulletImage = new Image();
-                bulletImage.Source = Settings.Bullet2;
-                Canvas.SetLeft(bulletImage, this.Left + this.Width / 2 + Settings.Bullet2LeftHorizontalOffset);
-                Canvas.SetTop(bulletImage, this.Top + Settings.BulletVerticalOffset);
-                bullets.AddLast(bulletImage);
-                mainScene.Children.Add(bulletImage);
+                double startX = this.Left + this.Width / 2 + Settings.Bullet2LeftHorizontalOffset;
+                double startY = this.Top + Settings.BulletVerticalOffset;
+                Bullet bullet = new Bullet(startX, startY, BulletKind.Bullet2);
+                mainScene.Children.Add(bullet.BulletImage);
+                Canvas.SetLeft(bullet.BulletImage, startX);
+                Canvas.SetTop(bullet.BulletImage, startY);
+                bullets.AddLast(bullet);
 
-                bulletImage = new Image();
-                bulletImage.Source = Settings.Bullet2;
-                Canvas.SetLeft(bulletImage, this.Left + this.Width / 2 + Settings.Bullet2RightHorizontalOffset);
-                Canvas.SetTop(bulletImage, this.Top + Settings.BulletVerticalOffset);
-                bullets.AddLast(bulletImage);
-                mainScene.Children.Add(bulletImage);
+                startX = this.Left + this.Width / 2 + Settings.Bullet2RightHorizontalOffset;
+                startY = this.Top + Settings.BulletVerticalOffset;
+                bullet = new Bullet(startX, startY, BulletKind.Bullet2);
+                mainScene.Children.Add(bullet.BulletImage);
+                Canvas.SetLeft(bullet.BulletImage, startX);
+                Canvas.SetTop(bullet.BulletImage, startY);
+                bullets.AddLast(bullet);
             }
         }
     }
