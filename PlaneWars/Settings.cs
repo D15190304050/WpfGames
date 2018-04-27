@@ -20,6 +20,7 @@ namespace PlaneWars
         public const double PlayerScaleFactor = 0.7;
         public const double PlayerSpeed = 8;
         public const int PlayerInitialHP = 3;
+        public const int PlayerBombMax = 3;
 
         public const double PlayerCollisionPoint1XOffset = 48;
         public const double PlayerCollisionPoint1YOffset = 0;
@@ -54,22 +55,18 @@ namespace PlaneWars
         public const double Bullet2RightHorizontalOffset = 28;
         public const double BulletWarheadTopOffset = 1;
         public const double BulletWarheadLeftOffset = 3;
-
-        public static BitmapImage Bullet1 { get; }
-        public static BitmapImage Bullet2 { get; }
+        public const int Bullet2Total = 100;
 
         // Common constants for enemies.
         public const double EnemyStartY = -5;
         public const int EnemyLeftMin = 0;
         public const int EnemyTopMax = 770;
-        public const int EnemyGenerationInterval1 = 60;
-        public const int EnemyGenerationInterval2 = 50;
-        public const int EnemyGenerationInterval3 = 40;
 
         // Constants for SmallEnemy.
         public const int SmallEnemyInitialHP = 1;
         public const int SmallEnemyLeftMax = 450;
         public const double SmallEnemyInitialSpeed = 2;
+        public const int SmallEnemyScore = 100;
 
         public const double SmallRectangleColliderLeftOffset = 33;
         public const double SmallRectangleColliderTopOffset = 8;
@@ -94,7 +91,8 @@ namespace PlaneWars
         // Constants for MiddleEnemy.
         public const int MiddleEnemyInitialHP = 8;
         public const int MiddleEnemyLeftMax = 440;
-        public const double MiddleEnemyInitialSpeed = 2;
+        public const double MiddleEnemyInitialSpeed = 0;
+        public const int MiddleEnemyScore = 1000;
 
         public const double MiddleUpRectangleColliderTopOffset = 40;
         public const double MiddleUpRectangleColliderLeftOffset = 0;
@@ -109,33 +107,80 @@ namespace PlaneWars
         public const int LargeEnemyInitialHP = 20;
         public const int LargeEnemyLeftMax = 308;
         public const int LargeEnemyWidth = 150;
-        public const double LargeEnemyInitialSpeed = 1;
+        public const double LargeEnemyInitialSpeed = -2;
+        public const int LargeEnemyScore = 2500;
 
-        public const double LargeUpRectangleColliderTopOffset = 5;
-        public const double LargeUpRectangleColliderLeftOffset = 15;
-        public const double LargeUpRectangleColliderWidth = 120;
-        public const double LargeUpRectangleColliderHeight = 180;
+        public const double LargeUpLeftRectangleColliderLeftOffset = 15;
+        public const double LargeUpLeftRectangleColliderTopOffset = 3;
+        public const double LargeUpLeftRectangleColliderWidth = 12;
+        public const double LargeUpLeftRectangleColliderHeight = 50;
 
-        public const double LargeDownRectangleColliderTopOffset = 185;
-        public const double LargeDownRectangleColliderLeftOffset = 20;
-        public const double LargeDownRectangleColliderWidth = 110;
-        public const double LargeDownRectangleColliderHeight = 20;
+        public const double LargeUpRightRectangleColliderLeftOffset = 124;
+        public const double LargeUpRightRectangleColliderTopOffset = 3;
+        public const double LargeUpRightRectangleColliderWidth = 12;
+        public const double LargeUpRightRectangleColliderHeight = 50;
 
-        public const double LargeLeftRectangleColliderTopOffset = 155;
+        public const double LargeMiddleRectangleColliderLeftOffset = 15;
+        public const double LargeMiddleRectangleColliderTopOffset = 52;
+        public const double LargeMiddleRectangleColliderWidth = 120;
+        public const double LargeMiddleRectangleColliderHeight = 132;
+
         public const double LargeLeftRectangleColliderLeftOffset = 3;
+        public const double LargeLeftRectangleColliderTopOffset = 153;
         public const double LargeLeftRectangleColliderWidth = 13;
-        public const double LargeLeftRectangleColliderHeight = 35;
+        public const double LargeLeftRectangleColliderHeight = 31;
 
-        public const double LargeRightRectangleColliderTopOffset = 155;
         public const double LargeRightRectangleColliderLeftOffset = 135;
+        public const double LargeRightRectangleColliderTopOffset = 153;
         public const double LargeRightRectangleColliderWidth = 13;
-        public const double LargeRightRectangleColliderHeight = 35;
+        public const double LargeRightRectangleColliderHeight = 31;
+
+        public const double LargeDownRectangleColliderLeftOffset = 23;
+        public const double LargeDownRectangleColliderTopOffset = 183;
+        public const double LargeDownRectangleColliderWidth = 105;
+        public const double LargeDownRectangleColliderHeight = 25;
+
+        // Common parameters for supplies.
+        public const double SupplyStartY = -5;
+        public const double SupplySpeed = 8;
+        public const int SupplyInterval = 2000;
+
+        public const int SupplyLeftMin = 0;
+        public const int SupplyLeftMax = 450;
+
+        // Rectangle collider parameters for supplies.
+        public const double BulletSupplyRectangleColliderLeftOffset = 18;
+        public const double BulletSupplyRectangleColliderTopOffset = 75;
+        public const double BulletSupplyRectangleColliderWidth = 52;
+        public const double BulletSupplyRectangleColliderHeight = 37;
+
+        public const double BombSupplyRectangleColliderLeftOffset = 5;
+        public const double BombSupplyRectangleColliderTopOffset = 95;
+        public const double BombSupplyRectangleColliderWidth = 63;
+        public const double BombSupplyRectangleColliderHeight = 42;
+
+        public static GenerationInterval[] GenerationIntervals { get; private set; }
+
+        public static int[] LevelScores { get; private set; }
 
         static Settings()
         {
-            //PlayerShootInterval = TimeSpan.FromMilliseconds(200);
-            Bullet1 = new BitmapImage(new Uri("Images/bullet1.png", UriKind.Relative));
-            Bullet2 = new BitmapImage(new Uri("Images/bullet2.png", UriKind.Relative));
+            GenerationIntervals = new GenerationInterval[7];
+            GenerationIntervals[0] = new GenerationInterval(60, int.MaxValue, int.MaxValue);
+            GenerationIntervals[1] = new GenerationInterval(58, 600, int.MaxValue);
+            GenerationIntervals[2] = new GenerationInterval(55, 580, int.MaxValue);
+            GenerationIntervals[3] = new GenerationInterval(50, 550, 600);
+            GenerationIntervals[4] = new GenerationInterval(45, 500, 550);
+            GenerationIntervals[5] = new GenerationInterval(40, 480, 500);
+            GenerationIntervals[6] = new GenerationInterval(30, 450, 450);
+
+            LevelScores = new int[6];
+            LevelScores[0] = 5000;
+            LevelScores[1] = 10000;
+            LevelScores[2] = 25000;
+            LevelScores[3] = 50000;
+            LevelScores[4] = 80000;
+            LevelScores[5] = 120000;
         }
     }
 }

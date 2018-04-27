@@ -17,9 +17,8 @@ namespace PlaneWars
         private BitmapImage[] normalImages;
         private BitmapImage[] destroyImages;
 
-        private int imageIndex;
-        
-        private int timer;
+        private int normalImageIndex;
+        private int destroyImageIndex;
 
         public BulletKind BulletKind { get; set; }
         public double Top { get { return Canvas.GetTop(playerImage); } }
@@ -28,6 +27,10 @@ namespace PlaneWars
         public double Height { get { return playerImage.Height; } }
 
         public int HP { get; set; }
+
+        public int BombCount { get; set; }
+
+        public bool CanMove { get; private set; }
 
         /// <summary>
         /// Points for collision detection.
@@ -38,12 +41,13 @@ namespace PlaneWars
 
         public PlayerPlane(Image playerImage)
         {
-            imageIndex = 0;
-            timer = 0;
+            normalImageIndex = 0;
             this.HP = Settings.PlayerInitialHP;
+            this.BombCount = Settings.PlayerBombMax;
             this.BulletKind = BulletKind.Bullet1;
 
             this.playerImage = playerImage;
+            this.CanMove = true;
 
             // Load normal images and show.
             normalImages = new BitmapImage[2];
@@ -56,11 +60,15 @@ namespace PlaneWars
             Canvas.SetLeft(playerImage, (Settings.PlayerLeftMin + Settings.PlayerLeftMax) / 2);
 
             // Load destroy images.
-            destroyImages = new BitmapImage[4];
+            destroyImages = new BitmapImage[8];
             destroyImages[0] = new BitmapImage(new Uri("Images/me_destroy_1.png", UriKind.Relative));
-            destroyImages[1] = new BitmapImage(new Uri("Images/me_destroy_2.png", UriKind.Relative));
-            destroyImages[2] = new BitmapImage(new Uri("Images/me_destroy_3.png", UriKind.Relative));
-            destroyImages[3] = new BitmapImage(new Uri("Images/me_destroy_4.png", UriKind.Relative));
+            destroyImages[1] = destroyImages[0];
+            destroyImages[2] = new BitmapImage(new Uri("Images/me_destroy_2.png", UriKind.Relative));
+            destroyImages[3] = destroyImages[2];
+            destroyImages[4] = new BitmapImage(new Uri("Images/me_destroy_3.png", UriKind.Relative));
+            destroyImages[5] = destroyImages[4];
+            destroyImages[6] = new BitmapImage(new Uri("Images/me_destroy_4.png", UriKind.Relative));
+            destroyImages[7] = destroyImages[6];
 
             collisionPoints = new List<Point2D>();
             collisionPoints.Add(new Point2D(this.Left + Settings.PlayerCollisionPoint1XOffset, this.Top + Settings.PlayerCollisionPoint1YOffset));
@@ -145,17 +153,13 @@ namespace PlaneWars
 
         public void SwitchNormalImage()
         {
-            imageIndex++;
-            imageIndex = imageIndex % normalImages.Length;
-            playerImage.Source = normalImages[imageIndex];
+            normalImageIndex++;
+            normalImageIndex = normalImageIndex % normalImages.Length;
+            playerImage.Source = normalImages[normalImageIndex];
         }
 
         public void Shoot(Canvas mainScene, LinkedList<Bullet> bullets)
         {
-            timer++;
-            if (timer % Settings.PlayerShootInterval != 0)
-                return;
-            
             if (this.BulletKind == BulletKind.Bullet1)
             {
                 double startX = this.Left + this.Width / 2;
@@ -184,6 +188,18 @@ namespace PlaneWars
                 Canvas.SetTop(bullet.BulletImage, startY);
                 bullets.AddLast(bullet);
             }
+        }
+
+        public void Destroy()
+        {
+            if (destroyImageIndex == destroyImages.Length)
+            {
+                destroyImageIndex = 0;
+                this.playerImage.Source = this.normalImages[0];
+                this.HP = 3;
+            }
+            else
+                this.playerImage.Source = this.destroyImages[destroyImageIndex++];
         }
     }
 }

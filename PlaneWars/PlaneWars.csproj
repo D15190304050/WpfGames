@@ -57,6 +57,7 @@
     <Compile Include="Bullet.cs" />
     <Compile Include="BulletKind.cs" />
     <Compile Include="Circle.cs" />
+    <Compile Include="GenerationInterval.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="EnemyKind.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -66,6 +67,8 @@
     <Compile Include="Point2D.cs" />
     <Compile Include="Rectangle2D.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Supply.cs" />
+    <Compile Include="SupplyKind.cs" />
     <Compile Include="Triangle2D.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

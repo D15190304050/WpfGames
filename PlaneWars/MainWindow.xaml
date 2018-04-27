@@ -7,11 +7,74 @@
         mc:Ignorable="d"
         Title="Plane Wars" Height="800" MaxHeight="800" MinHeight="800" Width="540" MaxWidth="540" MinWidth="540"
         Loaded="Window_Loaded"
-        Closing="Window_Closing">
+        Closing="Window_Closing"
+        KeyDown="Window_KeyDown">
+
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="FontFamily" Value="Cambria Math" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Image Source="Images/background.png" Stretch="Uniform" />
         <Canvas Name="mainScene">
-            <Image Name="playerImage" Canvas.Left="0" Canvas.Top="0" />
+            <Image Name="playerImage" Canvas.Left="210" Canvas.Top="250" />
+
+            <TextBlock Canvas.Left="20" Canvas.Top="10" Name="txtScore">Score: 0</TextBlock>
+
+            <Button Canvas.Left="450" Name="cmdPause" Click="cmdPause_Click">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <StackPanel>
+                                        <Image Name="imgPause" Source="Images/pause_nor.png" />
+                                    </StackPanel>
+
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="true">
+                                            <Setter TargetName="imgPause" Property="Source" Value="Images/pause_pressed.png" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Button Canvas.Left="450" Name="cmdResume" Click="cmdResume_Click" Visibility="Collapsed">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <StackPanel>
+                                        <Image Name="imgResume" Source="Images/resume_nor.png" />
+                                    </StackPanel>
+
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="true">
+                                            <Setter TargetName="imgResume" Property="Source" Value="Images/resume_pressed.png" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Image Source="Images/bomb.png" Canvas.Left="10" Canvas.Top="680" />
+            <TextBlock Name="txtBombCount" Canvas.Left="110" Canvas.Top="710">3</TextBlock>
         </Canvas>
     </Grid>
 </Window>

@@ -31,6 +31,11 @@ namespace PlaneWars
         private Random random;
         private int frameCount;
         private bool running;
+        private int score;
+        private int level;
+        private Supply supply;
+        private int bullet2Count;
+        private bool spaceKeyPressed;
 
         public MainWindow()
         {
@@ -43,6 +48,11 @@ namespace PlaneWars
             enemiesToRemove = new LinkedList<Enemy>();
             enemiesToDestroy = new LinkedList<Enemy>();
             running = true;
+            score = 0;
+            level = 0;
+            supply = null;
+            bullet2Count = 0;
+            spaceKeyPressed = false;
 
             InitializeComponent();
         }
@@ -53,8 +63,6 @@ namespace PlaneWars
             player.BulletKind = BulletKind.Bullet1;
 
             timer.Start();
-
-            //GenerateEnemy(EnemyKind.LargeEnemy);
         }
 
         private void ElapsedHandler(object sender, ElapsedEventArgs e)
@@ -64,22 +72,29 @@ namespace PlaneWars
 
         private void Update()
         {
-            PlayerMove();
-            player.SwitchNormalImage();
-            player.Shoot(mainScene, bullets);
-            BulletsUpdate();
-            EnemiesUpdate();
+            CheckForRestart();
+            if (!running)
+                return;
 
             frameCount++;
-            if (frameCount % Settings.EnemyGenerationInterval1 == 0)
-                GenerateEnemy(EnemyKind.SmallEnemy);
-
-            CheckForPauseResume();
-            CheckForRestart();
+            PlayerMove();
+            player.SwitchNormalImage();
+            BulletsUpdate();
+            PlayerShoot();
+            CheckForBomb();
+            EnemiesUpdate();
+            CheckForPlayerDestroy();
+            UpdatePlayerScore();
+            UpdateLevel();
+            GenerateEnemy();
+            SupplyUpdate();
         }
 
         private void PlayerMove()
         {
+            if (!player.CanMove)
+                return;
+
             if (Keyboard.IsKeyDown(Key.Up) && Keyboard.IsKeyDown(Key.Left))
             {
                 player.MoveUp();
@@ -110,6 +125,24 @@ namespace PlaneWars
                 player.MoveRight();
         }
 
+        private void PlayerShoot()
+        {
+            if (frameCount % Settings.PlayerShootInterval == 0)
+            {
+                player.Shoot(mainScene, bullets);
+
+                if (player.BulletKind == BulletKind.Bullet2)
+                {
+                    bullet2Count++;
+                    if (bullet2Count % Settings.Bullet2Total == 0)
+                    {
+                        bullet2Count = 0;
+                        player.BulletKind = BulletKind.Bullet1;
+                    }
+                }
+            }
+        }
+
         private void BulletsUpdate()
         {
             BulletMoveUp();
@@ -134,6 +167,18 @@ namespace PlaneWars
             }
         }
 
+        private void GenerateEnemy()
+        {
+            if (frameCount % Settings.GenerationIntervals[level].SmallEnemyGenerationInterval == 0)
+                GenerateEnemy(EnemyKind.SmallEnemy);
+
+            if (frameCount % Settings.GenerationIntervals[level].MiddleEnemyGenerationInterval == 0)
+                GenerateEnemy(EnemyKind.MiddleEnemy);
+
+            if (frameCount % Settings.GenerationIntervals[level].LargeEnemyGenerationInterval == 0)
+                GenerateEnemy(EnemyKind.LargeEnemy);
+        }
+
         private void GenerateEnemy(EnemyKind enemyKind)
         {
             int leftMax = 0;
@@ -150,7 +195,7 @@ namespace PlaneWars
                     break;
             }
             int startX = random.Next(Settings.EnemyLeftMin, leftMax);
-            Enemy enemy = new Enemy(enemyKind, startX);
+            Enemy enemy = new Enemy(enemyKind, startX, level);
             enemies.AddFirst(enemy);
             mainScene.Children.Add(enemy.EnemyImage);
         }
@@ -219,6 +264,7 @@ namespace PlaneWars
             {
                 enemies.Remove(enemy);
                 enemiesToDestroy.AddLast(enemy);
+                
             }
         }
 
@@ -234,15 +280,6 @@ namespace PlaneWars
                     if (enemy.Collide(p.X, p.Y))
                     {
                         player.HP = 0;
-
-                        Rectangle r = new Rectangle();
-                        Canvas.SetLeft(r, p.X);
-                        Canvas.SetTop(r, p.Y);
-                        r.Stroke = Brushes.Red;
-                        r.StrokeThickness = 2;
-                        r.Width = 20;
-                        r.Height = 20;
-                        mainScene.Children.Add(r);
 
                         mainScene.Children.Remove(playerImage);
                         collidedEnemy = enemy;
@@ -276,36 +313,96 @@ namespace PlaneWars
             {
                 enemiesToDestroy.Remove(enemy);
                 mainScene.Children.Remove(enemy.EnemyImage);
+                score += enemy.Score;
             }
         }
 
-        private void CheckForPauseResume()
+        private void UpdatePlayerScore()
         {
-            if (Keyboard.IsKeyDown(Key.P))
+            txtScore.Text = "Score: " + score;
+        }
+
+        private void UpdateLevel()
+        {
+            for (int i = 0; i < Settings.LevelScores.Length; i++)
             {
-                System.Diagnostics.Debug.WriteLine("Pressed");
+                if (score >= Settings.LevelScores[i])
+                    level = i + 1;
+            }
+        }
 
-                if (running)
-                {
-                    running = false;
+        private void SupplyUpdate()
+        {
+            if (frameCount % Settings.SupplyInterval == 0)
+                GenerateSupply();
 
-                    timer.Stop();
-                    timer = new Timer(15);
-                    timer.Elapsed += ElapsedHandler;
-                }
-                else
+            if (supply != null)
+            {
+                supply.MoveDown();
+                SupplyCollide();
+            }
+        }
+
+        private void GenerateSupply()
+        {
+            double r = random.NextDouble();
+            SupplyKind nextSupplyKind = r < 0.5 ? SupplyKind.BulletSupply : SupplyKind.BombSupply;
+
+            int startX = random.Next(Settings.SupplyLeftMin, Settings.SupplyLeftMax);
+            supply = new Supply(nextSupplyKind, startX);
+            mainScene.Children.Add(supply.SupplyImage);
+        }
+
+        private void SupplyCollide()
+        {
+            foreach (Point2D p in player.CollisionPoints)
+            {
+                if (supply.Collide(p.X, p.Y))
                 {
-                    running = true;
-                    timer.Start();
+                    if (supply.SupplyKind == SupplyKind.BulletSupply)
+                        player.BulletKind = BulletKind.Bullet2;
+                    else
+                    {
+                        if (player.BombCount < 3)
+                        {
+                            player.BombCount++;
+                            txtBombCount.Text = player.BombCount.ToString();
+                        }
+                    }
+
+                    mainScene.Children.Remove(supply.SupplyImage);
+                    supply = null;
+
+                    break;
                 }
             }
+        }
+
+        private void CheckForBomb()
+        {
+            if (spaceKeyPressed &&
+                Keyboard.IsKeyUp(Key.Space) &&
+                (player.BombCount > 0))
+            {
+                spaceKeyPressed = false;
+
+                foreach (Enemy enemy in enemies)
+                    enemiesToDestroy.AddLast(enemy);
+                enemies.Clear();
+                player.BombCount--;
+                txtBombCount.Text = player.BombCount.ToString();
+            }
+        }
+
+        private void CheckForPlayerDestroy()
+        {
+            if (player.HP == 0)
+                player.Destroy();
         }
 
         private void Restart()
         {
-            timer.Stop();
-            timer = new Timer(15);
-            timer.Elapsed += ElapsedHandler;
+            running = true;
 
             enemies.Clear();
             bullets.Clear();
@@ -314,25 +411,47 @@ namespace PlaneWars
             enemiesToDestroy.Clear();
             random = new Random();
             frameCount = 0;
+            score = 0;
+            level = 0;
+            bullet2Count = 0;
+            supply = null;
+            spaceKeyPressed = false;
             mainScene.Children.Clear();
 
-            running = true;
             mainScene.Children.Add(playerImage);
             player = new PlayerPlane(playerImage);
             player.BulletKind = BulletKind.Bullet1;
-
-            timer.Start();
         }
 
         private void CheckForRestart()
         {
-            if (player.HP == 0)
-                Restart();
+            //if (player.HP == 0)
+            //    Restart();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             timer.Stop();
+        }
+
+        private void cmdPause_Click(object sender, RoutedEventArgs e)
+        {
+            running = false;
+            cmdPause.Visibility = Visibility.Collapsed;
+            cmdResume.Visibility = Visibility.Visible;
+        }
+
+        private void cmdResume_Click(object sender, RoutedEventArgs e)
+        {
+            running = true;
+            cmdResume.Visibility = Visibility.Collapsed;
+            cmdPause.Visibility = Visibility.Visible;
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+                spaceKeyPressed = true;
         }
     }
 }

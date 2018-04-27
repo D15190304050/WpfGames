@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace PlaneWars
 {
@@ -14,10 +15,12 @@ namespace PlaneWars
     {
         public Image EnemyImage { get; set; }
         public int HP { get; set; }
-        private double speed;
+        public int Score { get; }
+        public double speed { get; set; }
+
         private EnemyKind enemyKind;
         private BitmapImage[] destroyImages;
-        private LinkedList<ICollider> colliders;
+        public LinkedList<ICollider> colliders;
         private int destroyImageIndex;
 
         public double Top { get { return Canvas.GetTop(this.EnemyImage); } }
@@ -73,7 +76,7 @@ namespace PlaneWars
             Enemy.LargeEnemyDestroyImages[7] = Enemy.LargeEnemyDestroyImages[6];
         }
 
-        public Enemy(EnemyKind enemyKind, double startX)
+        public Enemy(EnemyKind enemyKind, double startX, int level)
         {
             this.EnemyImage = new Image();
             this.enemyKind = enemyKind;
@@ -89,8 +92,9 @@ namespace PlaneWars
             {
                 destroyImages = SmallEnemyDestroyImages;
                 this.EnemyImage.Source = SmallEnemyImage;
-                speed = Settings.SmallEnemyInitialSpeed;
+                speed = Settings.SmallEnemyInitialSpeed + level;
                 this.HP = Settings.SmallEnemyInitialHP;
+                this.Score = Settings.SmallEnemyScore;
                 
                 Rectangle2D rectangleCollider = new Rectangle2D(left + Settings.SmallRectangleColliderLeftOffset,
                                                                 top + Settings.SmallRectangleColliderTopOffset,
@@ -124,8 +128,9 @@ namespace PlaneWars
             {
                 destroyImages = MiddleEnemyDestroyImages;
                 this.EnemyImage.Source = MiddleEnemyImage;
-                speed = Settings.MiddleEnemyInitialSpeed;
+                speed = Settings.MiddleEnemyInitialSpeed + level;
                 this.HP = Settings.MiddleEnemyInitialHP;
+                this.Score = Settings.MiddleEnemyScore;
 
                 Rectangle2D upRectangleCollider = new Rectangle2D(left + Settings.MiddleUpRectangleColliderLeftOffset,
                                                                   top + Settings.MiddleUpRectangleColliderTopOffset,
@@ -143,42 +148,91 @@ namespace PlaneWars
             {
                 destroyImages = LargeEnemyDestroyImages;
                 this.EnemyImage.Source = LargeEnemyImage;
-                speed = Settings.LargeEnemyInitialSpeed;
+                speed = Settings.LargeEnemyInitialSpeed + level;
                 this.HP = Settings.LargeEnemyInitialHP;
+                this.Score = Settings.LargeEnemyScore;
 
                 this.EnemyImage.Width = Settings.LargeEnemyWidth;
 
-                Rectangle2D upRectangleCollider = new Rectangle2D(left + Settings.LargeUpRectangleColliderLeftOffset,
-                                                                  top + Settings.LargeUpRectangleColliderTopOffset,
-                                                                  Settings.LargeUpRectangleColliderWidth,
-                                                                  Settings.LargeUpRectangleColliderHeight);
+                Rectangle2D upLeftRectangleCollider = new Rectangle2D(left + Settings.LargeUpLeftRectangleColliderLeftOffset,
+                                                                      top + Settings.LargeUpLeftRectangleColliderTopOffset,
+                                                                      Settings.LargeUpLeftRectangleColliderWidth,
+                                                                      Settings.LargeUpLeftRectangleColliderHeight);
+
+                Rectangle2D upRightRectangleCollider = new Rectangle2D(left + Settings.LargeUpRightRectangleColliderLeftOffset,
+                                                                       top + Settings.LargeUpRightRectangleColliderTopOffset,
+                                                                       Settings.LargeUpRightRectangleColliderWidth,
+                                                                       Settings.LargeUpRightRectangleColliderHeight);
+
+                Rectangle2D middleRectangleCollider = new Rectangle2D(left + Settings.LargeMiddleRectangleColliderLeftOffset,
+                                                                      top + Settings.LargeMiddleRectangleColliderTopOffset,
+                                                                      Settings.LargeMiddleRectangleColliderWidth,
+                                                                      Settings.LargeMiddleRectangleColliderHeight);
+
                 Rectangle2D downRectangleCollider = new Rectangle2D(left + Settings.LargeDownRectangleColliderLeftOffset,
                                                                     top + Settings.LargeDownRectangleColliderTopOffset,
                                                                     Settings.LargeDownRectangleColliderWidth,
                                                                     Settings.LargeDownRectangleColliderHeight);
+
                 Rectangle2D leftRectangleCollider = new Rectangle2D(left + Settings.LargeLeftRectangleColliderLeftOffset,
                                                                     top + Settings.LargeLeftRectangleColliderTopOffset,
                                                                     Settings.LargeLeftRectangleColliderWidth,
                                                                     Settings.LargeLeftRectangleColliderHeight);
+
                 Rectangle2D rightRectangleCollider = new Rectangle2D(left + Settings.LargeRightRectangleColliderLeftOffset,
                                                                      top + Settings.LargeRightRectangleColliderTopOffset,
                                                                      Settings.LargeRightRectangleColliderWidth,
                                                                      Settings.LargeRightRectangleColliderHeight);
-                colliders.AddLast(upRectangleCollider);
+                colliders.AddLast(upLeftRectangleCollider);
+                colliders.AddLast(upRightRectangleCollider);
+                colliders.AddLast(middleRectangleCollider);
                 colliders.AddLast(downRectangleCollider);
                 colliders.AddLast(leftRectangleCollider);
                 colliders.AddLast(rightRectangleCollider);
+
+                
+            }
+        }
+
+        public void DrawRectangleColliders(Canvas canvas)
+        {
+            LinkedList<Rectangle> rectanglesToRemove = new LinkedList<Rectangle>();
+
+            foreach (UIElement e in canvas.Children)
+            {
+                if (e is Rectangle)
+                    rectanglesToRemove.AddLast(e as Rectangle);
+            }
+
+            foreach (Rectangle r in rectanglesToRemove)
+                canvas.Children.Remove(r);
+
+            foreach (ICollider collider in colliders)
+            {
+                Rectangle2D r2D = collider as Rectangle2D;
+                if (r2D == null)
+                    continue;
+
+                Rectangle r = new Rectangle();
+                Canvas.SetLeft(r, r2D.StartX);
+                Canvas.SetTop(r, r2D.StartY);
+                r.Width = r2D.Width;
+                r.Height = r2D.Height;
+                r.Stroke = Brushes.Red;
+                r.StrokeThickness = 1;
+
+                canvas.Children.Add(r);
             }
         }
 
         public void MoveDown()
         {
             // Move enemy plane image.
-            Canvas.SetTop(this.EnemyImage, this.Top + speed);
+            Canvas.SetTop(this.EnemyImage, this.Top + this.speed);
 
             // Move its collider component.
             foreach (ICollider collider in colliders)
-                collider.MoveDown(speed);
+                collider.MoveDown(this.speed);
         }
 
         public bool Collide(double x, double y)
