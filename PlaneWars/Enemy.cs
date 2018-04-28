@@ -11,36 +11,103 @@ using System.Windows.Shapes;
 
 namespace PlaneWars
 {
+    /// <summary>
+    /// The Enemy class represents enemies in the game plane wars.
+    /// </summary>
     public class Enemy
     {
-        public Image EnemyImage { get; set; }
+        /// <summary>
+        /// Gets the Image of this enemy.
+        /// </summary>
+        public Image EnemyImage { get; }
+
+        /// <summary>
+        /// Gets HP of this enemy.
+        /// </summary>
         public int HP { get; set; }
+
+        /// <summary>
+        /// Gets the score that the player can obtain when this enemis dies.
+        /// </summary>
         public int Score { get; }
+
+        /// <summary>
+        /// Speed of this enemy.
+        /// </summary>
         public double speed;
 
+        /// <summary>
+        /// Gets the kind of this enemy.
+        /// </summary>
         public EnemyKind EnemyKind { get; }
+
+        /// <summary>
+        /// A sequence images for explosions.
+        /// </summary>
         private BitmapImage[] destroyImages;
-        public LinkedList<ICollider> colliders;
+
+        /// <summary>
+        /// Gets the colliders of this enemy.
+        /// </summary>
+        public LinkedList<ICollider> Colliders { get; private set; }
+
+        /// <summary>
+        /// The index of next destroy image to show when this enemy is destroying.
+        /// </summary>
         private int destroyImageIndex;
 
+        /// <summary>
+        /// Gets the y-coordinate of the top-left point of this enemy's image to show.
+        /// </summary>
         public double Top { get { return Canvas.GetTop(this.EnemyImage); } }
+
+        /// <summary>
+        /// Gets the x-coordinate of the top-left point of this enemy's image to show.
+        /// </summary>
         public double Left { get { return Canvas.GetLeft(this.EnemyImage); } }
 
-        public bool CanRemove { get; private set; }
+        /// <summary>
+        /// Gets the value that indicates whether the main scence can remove this enemy.
+        /// </summary>
+        public bool CanBeRemoved { get; private set; }
 
+        /// <summary>
+        /// Image of small enemy.
+        /// </summary>
         protected static BitmapImage SmallEnemyImage { get; private set; }
+        
+        /// <summary>
+        /// Images to show when small enemies is destroying.
+        /// </summary>
         protected static BitmapImage[] SmallEnemyDestroyImages { get; private set; }
 
+        /// <summary>
+        /// Image of middle enemy.
+        /// </summary>
         protected static BitmapImage MiddleEnemyImage { get; private set; }
 
+        /// <summary>
+        /// Images to show when middle enemies is destroying.
+        /// </summary>
         protected static BitmapImage[] MiddleEnemyDestroyImages { get; private set; }
 
+        /// <summary>
+        /// Image of large enemy.
+        /// </summary>
         protected static BitmapImage LargeEnemyImage { get; private set; }
 
+        /// <summary>
+        /// Images to show when large enemies is destroying.
+        /// </summary>
         protected static BitmapImage[] LargeEnemyDestroyImages { get; private set; }
 
+        /// <summary>
+        /// Load BitmapImage variables only once.
+        /// </summary>
         static Enemy()
         {
+            // Load images.
+
             Enemy.SmallEnemyImage = new BitmapImage(new Uri("Images/enemy1.png", UriKind.Relative));
 
             Enemy.SmallEnemyDestroyImages = new BitmapImage[8];
@@ -76,26 +143,48 @@ namespace PlaneWars
             Enemy.LargeEnemyDestroyImages[7] = Enemy.LargeEnemyDestroyImages[6];
         }
 
+        /// <summary>
+        /// Initializes a new instance of the Enemy class with given enemy kind, startX and level.
+        /// </summary>
+        /// <param name="enemyKind">Specifies which kind of enemy it is.</param>
+        /// <param name="startX">The x-coordinate of the top-left point of this enemy's image to show.</param>
+        /// <param name="level">Currrent difficulty level.</param>
         public Enemy(EnemyKind enemyKind, double startX, int level)
         {
+            // Initialize a new Image for this enemy to show.
             this.EnemyImage = new Image();
+
+            // Save the kind.
             this.EnemyKind = enemyKind;
+
+            // Set its coordinate.
             Canvas.SetLeft(this.EnemyImage, startX);
             Canvas.SetTop(this.EnemyImage, Settings.EnemyStartY);
-            colliders = new LinkedList<ICollider>();
+
+            // Initialize the collection of colliders of this enemy.
+            Colliders = new LinkedList<ICollider>();
+
+            // Set the image to display when destroying to 0.
             destroyImageIndex = 0;
-            this.CanRemove = false;
+
+            // This enemy is alive when initializing, so it can't be removed.
+            this.CanBeRemoved = false;
+
+            // Get the coordinate of the top-left point of this enemy's image.
+            // This will be re-used for multiple times.
             double left = this.Left;
             double top = this.Top;
 
             if (enemyKind == EnemyKind.SmallEnemy)
             {
+                // Configure the flying and destroying images, speed, HP, and score of small enemy.
                 destroyImages = SmallEnemyDestroyImages;
                 this.EnemyImage.Source = SmallEnemyImage;
                 speed = Settings.SmallEnemyInitialSpeed + level;
                 this.HP = Settings.SmallEnemyInitialHP;
                 this.Score = Settings.SmallEnemyScore;
                 
+                // Generate colliders of this enemy.
                 Rectangle2D rectangleCollider = new Rectangle2D(left + Settings.SmallRectangleColliderLeftOffset,
                                                                 top + Settings.SmallRectangleColliderTopOffset,
                                                                 Settings.SmallRectangleColliderWidth,
@@ -119,19 +208,22 @@ namespace PlaneWars
                 Triangle2D leftTriangleCollider = new Triangle2D(p1, p2, p3);
                 Triangle2D rightTriangleCollider = new Triangle2D(p4, p5, p6);
 
-                colliders.AddLast(rectangleCollider);
-                colliders.AddLast(circleCollider);
-                colliders.AddLast(leftTriangleCollider);
-                colliders.AddLast(rightTriangleCollider);
+                // Add colliders to the collider collection.
+                Colliders.AddLast(rectangleCollider);
+                Colliders.AddLast(circleCollider);
+                Colliders.AddLast(leftTriangleCollider);
+                Colliders.AddLast(rightTriangleCollider);
             }
             else if (enemyKind == EnemyKind.MiddleEnemy)
             {
+                // Configure the flying and destroying images, speed, HP, and score of middle enemy.
                 destroyImages = MiddleEnemyDestroyImages;
                 this.EnemyImage.Source = MiddleEnemyImage;
                 speed = Settings.MiddleEnemyInitialSpeed + level;
                 this.HP = Settings.MiddleEnemyInitialHP;
                 this.Score = Settings.MiddleEnemyScore;
 
+                // Generate colliders of this enemy.
                 Rectangle2D upRectangleCollider = new Rectangle2D(left + Settings.MiddleUpRectangleColliderLeftOffset,
                                                                   top + Settings.MiddleUpRectangleColliderTopOffset,
                                                                   Settings.MiddleUpRectangleColliderWidth,
@@ -141,11 +233,13 @@ namespace PlaneWars
                                                                     Settings.MiddleDownRectangleColliderWidth,
                                                                     Settings.MiddleDownRectangleColliderHeight);
 
-                colliders.AddLast(upRectangleCollider);
-                colliders.AddLast(downRectangleCollider);
+                // Add colliders to the collider collection.
+                Colliders.AddLast(upRectangleCollider);
+                Colliders.AddLast(downRectangleCollider);
             }
             else
             {
+                // Configure the flying and destroying images, speed, HP, and score of large enemy.
                 destroyImages = LargeEnemyDestroyImages;
                 this.EnemyImage.Source = LargeEnemyImage;
                 speed = Settings.LargeEnemyInitialSpeed + level;
@@ -154,6 +248,7 @@ namespace PlaneWars
 
                 this.EnemyImage.Width = Settings.LargeEnemyWidth;
 
+                // Generate colliders of this enemy.
                 Rectangle2D upLeftRectangleCollider = new Rectangle2D(left + Settings.LargeUpLeftRectangleColliderLeftOffset,
                                                                       top + Settings.LargeUpLeftRectangleColliderTopOffset,
                                                                       Settings.LargeUpLeftRectangleColliderWidth,
@@ -183,31 +278,39 @@ namespace PlaneWars
                                                                      top + Settings.LargeRightRectangleColliderTopOffset,
                                                                      Settings.LargeRightRectangleColliderWidth,
                                                                      Settings.LargeRightRectangleColliderHeight);
-                colliders.AddLast(upLeftRectangleCollider);
-                colliders.AddLast(upRightRectangleCollider);
-                colliders.AddLast(middleRectangleCollider);
-                colliders.AddLast(downRectangleCollider);
-                colliders.AddLast(leftRectangleCollider);
-                colliders.AddLast(rightRectangleCollider);
+
+                // Add colliders to the collider collection.
+                Colliders.AddLast(upLeftRectangleCollider);
+                Colliders.AddLast(upRightRectangleCollider);
+                Colliders.AddLast(middleRectangleCollider);
+                Colliders.AddLast(downRectangleCollider);
+                Colliders.AddLast(leftRectangleCollider);
+                Colliders.AddLast(rightRectangleCollider);
 
                 
             }
         }
 
+        /// <summary>
+        /// Draws all the rectangle colliders of this enemy.
+        /// </summary>
+        /// <param name="canvas">The canvas to draw.</param>
         public void DrawRectangleColliders(Canvas canvas)
         {
+            // Find rectangles to remove, leave other UIElements alone.
             LinkedList<Rectangle> rectanglesToRemove = new LinkedList<Rectangle>();
-
             foreach (UIElement e in canvas.Children)
             {
                 if (e is Rectangle)
                     rectanglesToRemove.AddLast(e as Rectangle);
             }
 
+            // Remove all old rectangles.
             foreach (Rectangle r in rectanglesToRemove)
                 canvas.Children.Remove(r);
 
-            foreach (ICollider collider in colliders)
+            // Draw new rectangles.
+            foreach (ICollider collider in Colliders)
             {
                 Rectangle2D r2D = collider as Rectangle2D;
                 if (r2D == null)
@@ -225,19 +328,27 @@ namespace PlaneWars
             }
         }
 
+        // Makes this enemy move down.
         public void MoveDown()
         {
             // Move enemy plane image.
             Canvas.SetTop(this.EnemyImage, this.Top + this.speed);
 
             // Move its collider component.
-            foreach (ICollider collider in colliders)
+            foreach (ICollider collider in Colliders)
                 collider.MoveDown(this.speed);
         }
 
+        /// <summary>
+        /// Returns true if this enemy collides with (contains) the given point, otherwise, false.
+        /// </summary>
+        /// <param name="x">X-coordinate of the given point.</param>
+        /// <param name="y">Y-coordinate of the given point.</param>
+        /// <returns>True if this enemy collides with (contains) the given point, otherwise, false.</returns>
         public bool Collide(double x, double y)
         {
-            foreach (ICollider collider in colliders)
+            // Note: Collidsion occurs if any collider contains the given point.
+            foreach (ICollider collider in Colliders)
             {
                 if (collider.Collide(x, y))
                     return true;
@@ -245,11 +356,17 @@ namespace PlaneWars
             return false;
         }
 
+        /// <summary>
+        /// Plays destroy images when this enemy is dead.
+        /// </summary>
         public void Destroy()
         {
+            // Show next destroy image if the index is less than the length of the array.
+            // Set CanBeRemoved to true when finishing showing destroy images.
+
             if (destroyImageIndex == destroyImages.Length)
             {
-                this.CanRemove = true;
+                this.CanBeRemoved = true;
                 return;
             }
             else

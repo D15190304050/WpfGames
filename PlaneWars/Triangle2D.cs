@@ -6,23 +6,56 @@ using System.Threading.Tasks;
 
 namespace PlaneWars
 {
+    /// <summary>
+    /// The Triangle2D class represents a triangle in a 2-D surface.
+    /// </summary>
     public class Triangle2D : ICollider
     {
+        /// <summary>
+        /// Gets 1st vertex of this triangle.
+        /// </summary>
         public Point2D Vertex1 { get; }
+
+        /// <summary>
+        /// Gets 2nd vertex of this triangle.
+        /// </summary>
         public Point2D Vertex2 { get; }
+
+        /// <summary>
+        /// Gets 3rd vertex of this triangle.
+        /// </summary>
         public Point2D Vertex3 { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the Triangle2D class with 3 given vertices.
+        /// </summary>
+        /// <param name="point1">1st vertex of this triangle.</param>
+        /// <param name="point2">2nd vertex of this triangle.</param>
+        /// <param name="point3">3rd vertex of this triangle.</param>
+        /// <exception cref="ArgumentException">If 3 given points are on the same line.</exception>
         public Triangle2D(Point2D point1, Point2D point2, Point2D point3)
         {
+            // Check whether 3 given points are on the same line.
+            // Throw an exception if it is.
+            Line2D line = new Line2D(point1, point2);
+            if (line.Contains(point3.X, point3.Y))
+                throw new ArgumentException("3 given points are on the same line.");
+
+            // Save 3 vertices.
             this.Vertex1 = point1;
             this.Vertex2 = point2;
             this.Vertex3 = point3;
-
-            
         }
 
+        /// <summary>
+        /// Returns true if this triangle collides with (contains) the given point, otherwise, false.
+        /// </summary>
+        /// <param name="x">X-coordinate of the given point.</param>
+        /// <param name="y">Y-coordinate of the given point.</param>
+        /// <returns>True if this triangle collides with (contains) the given point, otherwise, false.</returns>
         public bool Collide(double x, double y)
         {
+            // Get 3 line segments of this triangle.
             LineSegment2D lineSegment1 = new LineSegment2D(this.Vertex1, this.Vertex2);
             LineSegment2D lineSegment2 = new LineSegment2D(this.Vertex1, this.Vertex3);
             LineSegment2D lineSegment3 = new LineSegment2D(this.Vertex2, this.Vertex3);
@@ -59,7 +92,7 @@ namespace PlaneWars
                 Point2D intersection3 = lineSegment3.GetIntersectionWith(horizontalLine);
 
                 // If there is 1 of the intersections is null, then just check the other 2.
-                // Otherwise, see comment from line 74 to line 76.
+                // Otherwise, just check 2 different intersections.
 
                 if (intersection1 == null)
                     return Collide(intersection2, intersection3, x);
@@ -86,6 +119,10 @@ namespace PlaneWars
             // Note that program will never reach here.
         }
 
+        /// <summary>
+        /// Makes this triangle move down.
+        /// </summary>
+        /// <param name="speed">The distance to move.</param>
         public void MoveDown(double speed)
         {
             this.Vertex1.Y += speed;
@@ -93,6 +130,11 @@ namespace PlaneWars
             this.Vertex3.Y += speed;
         }
 
+        /// <summary>
+        /// Switches the reference of 2 given Line2D argument.
+        /// </summary>
+        /// <param name="line1"></param>
+        /// <param name="line2"></param>
         private static void SwitchLine(Line2D line1, Line2D line2)
         {
             Line2D swap = line1;
@@ -101,17 +143,19 @@ namespace PlaneWars
         }
 
         /// <summary>
-        /// Returns true if x is between 2 intersections, otherwise, false.
+        /// Returns true if x is between x-coordinates of 2 intersections, otherwise, false.
         /// </summary>
-        /// <param name="intersection1"></param>
-        /// <param name="intersection2"></param>
-        /// <param name="x"></param>
+        /// <param name="intersection1">An intersection.</param>
+        /// <param name="intersection2">The other intersection.</param>
+        /// <param name="x">True if x is between x-coordinates of 2 intersections, otherwise, false.</param>
         /// <returns></returns>
         private static bool Collide(Point2D intersection1, Point2D intersection2, double x)
         {
+            // Return false if one of the intersections is null.
             if ((intersection1 == null) || (intersection2 == null))
                 return false;
 
+            // Get the range of x.
             double xMin;
             double xMax;
             if (intersection1.X < intersection2.X)
@@ -125,12 +169,17 @@ namespace PlaneWars
                 xMax = intersection1.X;
             }
 
+            // Check whether the given x is in the range.
             if ((xMin <= x) && (x <= xMax))
                 return true;
             else
                 return false;
         }
 
+        /// <summary>
+        /// Returns the string representation of this triangle, i.e. 3 vertices.
+        /// </summary>
+        /// <returns>The string representation of this triangle, i.e. 3 vertices.</returns>
         public override string ToString()
         {
             return string.Format("Triangle with vertex1 = {0}, vertex2 = {1}, vertex3 = {2}", this.Vertex1, this.Vertex2, this.Vertex3);
