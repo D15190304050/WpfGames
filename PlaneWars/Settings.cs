@@ -143,7 +143,7 @@ namespace PlaneWars
         // Common parameters for supplies.
         public const double SupplyStartY = -5;
         public const double SupplySpeed = 8;
-        public const int SupplyInterval = 2000;
+        public const int SupplyInterval = 1000;
 
         public const int SupplyLeftMin = 0;
         public const int SupplyLeftMax = 450;

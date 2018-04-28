@@ -36,9 +36,46 @@ namespace PlaneWars
         private Supply supply;
         private int bullet2Count;
         private bool spaceKeyPressed;
+        private MediaPlayer musicPlayerShoot;
+        private MediaPlayer musicPlayerGetBomb;
+        private MediaPlayer musicPlayerGetBullet;
+        private MediaPlayer musicSmallEnemyDestroy;
+        private MediaPlayer musicMiddleEnemyDestroy;
+        private MediaPlayer musicLargeEnemyDestroy;
+        private MediaPlayer musicPlayerUseBomb;
+        private MediaPlayer musicPlayerClicked;
+        private MediaPlayer musicBGM;
 
         public MainWindow()
         {
+            // Load sounds.
+            musicPlayerShoot = new MediaPlayer();
+            musicPlayerShoot.Open(new Uri("Sounds/bullet.wav", UriKind.Relative));
+
+            musicPlayerGetBomb = new MediaPlayer();
+            musicPlayerGetBomb.Open(new Uri("Sounds/get_bomb.wav", UriKind.Relative));
+
+            musicPlayerGetBullet = new MediaPlayer();
+            musicPlayerGetBullet.Open(new Uri("Sounds/get_bullet.wav", UriKind.Relative));
+
+            musicSmallEnemyDestroy = new MediaPlayer();
+            musicSmallEnemyDestroy.Open(new Uri("Sounds/enemy1_down.wav", UriKind.Relative));
+
+            musicMiddleEnemyDestroy = new MediaPlayer();
+            musicMiddleEnemyDestroy.Open(new Uri("Sounds/enemy2_down.wav", UriKind.Relative));
+
+            musicLargeEnemyDestroy = new MediaPlayer();
+            musicLargeEnemyDestroy.Open(new Uri("Sounds/enemy3_down.wav", UriKind.Relative));
+
+            musicPlayerUseBomb = new MediaPlayer();
+            musicPlayerUseBomb.Open(new Uri("Sounds/use_bomb.wav", UriKind.Relative));
+
+            musicPlayerClicked = new MediaPlayer();
+            musicPlayerClicked.Open(new Uri("Sounds/button.wav", UriKind.Relative));
+
+            musicBGM = new MediaPlayer();
+            musicBGM.Open(new Uri("Sounds/game_music.mp3", UriKind.Relative));
+
             timer = new Timer(15);
             timer.Elapsed += ElapsedHandler;
             enemies = new LinkedList<Enemy>();
@@ -62,6 +99,8 @@ namespace PlaneWars
             player = new PlayerPlane(playerImage);
             player.BulletKind = BulletKind.Bullet1;
 
+            musicBGM.Play();
+
             timer.Start();
         }
 
@@ -72,27 +111,37 @@ namespace PlaneWars
 
         private void Update()
         {
-            CheckForRestart();
             if (!running)
                 return;
 
+            PlayBgm();
             frameCount++;
             PlayerMove();
-            player.SwitchNormalImage();
             BulletsUpdate();
             PlayerShoot();
             CheckForBomb();
             EnemiesUpdate();
+            CheckForGameOver();
             CheckForPlayerDestroy();
             UpdatePlayerScore();
             UpdateLevel();
             GenerateEnemy();
             SupplyUpdate();
+            ShowRemainingLives();
+        }
+
+        private void PlayBgm()
+        {
+            if (musicBGM.Position > TimeSpan.FromSeconds(49))
+            {
+                musicBGM.Position = TimeSpan.FromSeconds(0);
+                musicBGM.Play();
+            }
         }
 
         private void PlayerMove()
         {
-            if (!player.CanMove)
+            if (player.Destroying)
                 return;
 
             if (Keyboard.IsKeyDown(Key.Up) && Keyboard.IsKeyDown(Key.Left))
@@ -140,6 +189,9 @@ namespace PlaneWars
                         player.BulletKind = BulletKind.Bullet1;
                     }
                 }
+
+                musicPlayerShoot.Play();
+                musicPlayerShoot.Position = TimeSpan.FromSeconds(0);
             }
         }
 
@@ -279,9 +331,9 @@ namespace PlaneWars
                 {
                     if (enemy.Collide(p.X, p.Y))
                     {
-                        player.HP = 0;
-
-                        mainScene.Children.Remove(playerImage);
+                        player.HP--;
+                        player.Destroying = true;
+                        
                         collidedEnemy = enemy;
                         collidedEnemy.HP = 0;
 
@@ -314,6 +366,22 @@ namespace PlaneWars
                 enemiesToDestroy.Remove(enemy);
                 mainScene.Children.Remove(enemy.EnemyImage);
                 score += enemy.Score;
+
+                switch (enemy.EnemyKind)
+                {
+                    case EnemyKind.SmallEnemy:
+                        musicSmallEnemyDestroy.Play();
+                        musicSmallEnemyDestroy.Position = TimeSpan.FromSeconds(0);
+                        break;
+                    case EnemyKind.MiddleEnemy:
+                        musicMiddleEnemyDestroy.Play();
+                        musicMiddleEnemyDestroy.Position = TimeSpan.FromSeconds(0);
+                        break;
+                    case EnemyKind.LargeEnemy:
+                        musicLargeEnemyDestroy.Play();
+                        musicLargeEnemyDestroy.Position = TimeSpan.FromSeconds(0);
+                        break;
+                }
             }
         }
 
@@ -360,13 +428,20 @@ namespace PlaneWars
                 if (supply.Collide(p.X, p.Y))
                 {
                     if (supply.SupplyKind == SupplyKind.BulletSupply)
+                    {
                         player.BulletKind = BulletKind.Bullet2;
+                        musicPlayerGetBullet.Play();
+                        musicPlayerGetBullet.Position = TimeSpan.FromSeconds(0);
+                    }
                     else
                     {
                         if (player.BombCount < 3)
                         {
                             player.BombCount++;
                             txtBombCount.Text = player.BombCount.ToString();
+
+                            musicPlayerGetBomb.Play();
+                            musicPlayerGetBomb.Position = TimeSpan.FromSeconds(0);
                         }
                     }
 
@@ -386,6 +461,9 @@ namespace PlaneWars
             {
                 spaceKeyPressed = false;
 
+                musicPlayerUseBomb.Play();
+                musicPlayerUseBomb.Position = TimeSpan.FromSeconds(0);
+
                 foreach (Enemy enemy in enemies)
                     enemiesToDestroy.AddLast(enemy);
                 enemies.Clear();
@@ -396,8 +474,36 @@ namespace PlaneWars
 
         private void CheckForPlayerDestroy()
         {
-            if (player.HP == 0)
+            if (player.Destroying)
                 player.Destroy();
+        }
+
+        private void ShowRemainingLives()
+        {
+            switch (player.HP)
+            {
+                // In fact, the branch case 0 will never be accessed.
+                case 0:
+                    imgLife1.Visibility = Visibility.Collapsed;
+                    imgLife2.Visibility = Visibility.Collapsed;
+                    imgLife3.Visibility = Visibility.Collapsed;
+                    break;
+                case 1:
+                    imgLife1.Visibility = Visibility.Visible;
+                    imgLife2.Visibility = Visibility.Collapsed;
+                    imgLife3.Visibility = Visibility.Collapsed;
+                    break;
+                case 2:
+                    imgLife1.Visibility = Visibility.Visible;
+                    imgLife2.Visibility = Visibility.Visible;
+                    imgLife3.Visibility = Visibility.Collapsed;
+                    break;
+                case 3:
+                    imgLife1.Visibility = Visibility.Visible;
+                    imgLife2.Visibility = Visibility.Visible;
+                    imgLife3.Visibility = Visibility.Visible;
+                    break;
+            }
         }
 
         private void Restart()
@@ -417,16 +523,21 @@ namespace PlaneWars
             supply = null;
             spaceKeyPressed = false;
             mainScene.Children.Clear();
+            imgLife1.Visibility = Visibility.Visible;
+            imgLife2.Visibility = Visibility.Visible;
+            imgLife3.Visibility = Visibility.Visible;
 
             mainScene.Children.Add(playerImage);
             player = new PlayerPlane(playerImage);
             player.BulletKind = BulletKind.Bullet1;
-        }
+            mainScene.Children.Add(imgBomb);
+            mainScene.Children.Add(imgLife1);
+            mainScene.Children.Add(imgLife2);
+            mainScene.Children.Add(imgLife3);
+            mainScene.Children.Add(txtBombCount);
+            mainScene.Children.Add(txtScore);
 
-        private void CheckForRestart()
-        {
-            //if (player.HP == 0)
-            //    Restart();
+            txtBombCount.Text = player.BombCount.ToString();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -452,6 +563,31 @@ namespace PlaneWars
         {
             if (e.Key == Key.Space)
                 spaceKeyPressed = true;
+        }
+
+        private void CheckForGameOver()
+        {
+            if (player.HP == 0)
+            {
+                mainScene.Visibility = Visibility.Collapsed;
+                gameOverScene.Visibility = Visibility.Visible;
+                running = false;
+            }
+        }
+
+        private void cmdGameOver_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void cmdRestart_Click(object sender, RoutedEventArgs e)
+        {
+            musicPlayerClicked.Play();
+            musicPlayerClicked.Position = TimeSpan.FromSeconds(0);
+
+            mainScene.Visibility = Visibility.Visible;
+            gameOverScene.Visibility = Visibility.Collapsed;
+            Restart();
         }
     }
 }

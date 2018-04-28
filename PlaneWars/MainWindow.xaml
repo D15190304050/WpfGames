@@ -24,7 +24,7 @@
 
     <Grid>
         <Image Source="Images/background.png" Stretch="Uniform" />
-        <Canvas Name="mainScene">
+        <Canvas Name="mainScene" Visibility="Visible">
             <Image Name="playerImage" Canvas.Left="210" Canvas.Top="250" />
 
             <TextBlock Canvas.Left="20" Canvas.Top="10" Name="txtScore">Score: 0</TextBlock>
@@ -73,8 +73,59 @@
                 </Button.Style>
             </Button>
 
-            <Image Source="Images/bomb.png" Canvas.Left="10" Canvas.Top="680" />
+            <Image Name="imgBomb" Source="Images/bomb.png" Canvas.Left="10" Canvas.Top="680" />
             <TextBlock Name="txtBombCount" Canvas.Left="110" Canvas.Top="710">3</TextBlock>
+
+            <Image Name="imgLife1" Source="Images/life.png" Canvas.Left="470" Canvas.Top="700" />
+            <Image Name="imgLife2" Source="Images/life.png" Canvas.Left="420" Canvas.Top="700" />
+            <Image Name="imgLife3" Source="Images/life.png" Canvas.Left="370" Canvas.Top="700" />
+
         </Canvas>
+
+        <StackPanel Name="gameOverScene" Visibility="Collapsed" VerticalAlignment="Center" Margin="20">
+            <Button Click="cmdRestart_Click" Margin="0,0,0,20">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <StackPanel>
+                                        <Image Source="Images/again.png" />
+                                    </StackPanel>
+
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="true">
+                                            <Setter Property="Background" Value="Transparent" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Button Click="cmdGameOver_Click">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <StackPanel>
+                                        <Image Source="Images/gameover.png" />
+                                    </StackPanel>
+
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="true">
+                                            <Setter Property="Background" Value="Transparent" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
     </Grid>
 </Window>

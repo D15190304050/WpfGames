@@ -30,7 +30,7 @@ namespace PlaneWars
 
         public int BombCount { get; set; }
 
-        public bool CanMove { get; private set; }
+        public bool Destroying { get; set; }
 
         /// <summary>
         /// Points for collision detection.
@@ -47,7 +47,7 @@ namespace PlaneWars
             this.BulletKind = BulletKind.Bullet1;
 
             this.playerImage = playerImage;
-            this.CanMove = true;
+            this.Destroying = false;
 
             // Load normal images and show.
             normalImages = new BitmapImage[2];
@@ -196,7 +196,10 @@ namespace PlaneWars
             {
                 destroyImageIndex = 0;
                 this.playerImage.Source = this.normalImages[0];
-                this.HP = 3;
+                this.Destroying = false;
+
+                Canvas.SetTop(playerImage, Settings.PlayerTopMax);
+                Canvas.SetLeft(playerImage, (Settings.PlayerLeftMin + Settings.PlayerLeftMax) / 2);
             }
             else
                 this.playerImage.Source = this.destroyImages[destroyImageIndex++];

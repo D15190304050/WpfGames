@@ -16,9 +16,9 @@ namespace PlaneWars
         public Image EnemyImage { get; set; }
         public int HP { get; set; }
         public int Score { get; }
-        public double speed { get; set; }
+        public double speed;
 
-        private EnemyKind enemyKind;
+        public EnemyKind EnemyKind { get; }
         private BitmapImage[] destroyImages;
         public LinkedList<ICollider> colliders;
         private int destroyImageIndex;
@@ -79,7 +79,7 @@ namespace PlaneWars
         public Enemy(EnemyKind enemyKind, double startX, int level)
         {
             this.EnemyImage = new Image();
-            this.enemyKind = enemyKind;
+            this.EnemyKind = enemyKind;
             Canvas.SetLeft(this.EnemyImage, startX);
             Canvas.SetTop(this.EnemyImage, Settings.EnemyStartY);
             colliders = new LinkedList<ICollider>();
