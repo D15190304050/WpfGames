@@ -159,6 +159,14 @@ namespace PlaneWars
         public const double BombSupplyRectangleColliderWidth = 63;
         public const double BombSupplyRectangleColliderHeight = 42;
 
+        /// <summary>
+        /// Connection string for this game.
+        /// </summary>
+        public const string connectionString = "Server = localhost; User = DinoStark; Password = non-feeling; Database = PlaneWars;";
+
+        public const string LoginHint = "Please Login";
+        public const string RegisterHint = "Please Register";
+
         public static GenerationInterval[] GenerationIntervals { get; private set; }
 
         public static int[] LevelScores { get; private set; }

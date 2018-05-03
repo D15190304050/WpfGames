@@ -20,11 +20,59 @@
             <Setter Property="FontFamily" Value="Cambria Math" />
             <Setter Property="Foreground" Value="White" />
         </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="FontFamily" Value="Cambria Math" />
+            <Setter Property="Foreground" Value="Black" />
+        </Style>
     </Window.Resources>
 
     <Grid>
         <Image Source="Images/background.png" Stretch="Uniform" />
-        <Canvas Name="mainScene" Visibility="Visible">
+
+        <Grid Name="loginScene" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="20" Visibility="Visible">
+            <Grid.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="FontSize" Value="28" />
+                    <Setter Property="FontFamily" Value="Cambria Math" />
+                    <Setter Property="Background" Value="AliceBlue" />
+                    <Setter Property="Padding" Value="5" />
+                    <Setter Property="Margin" Value="10" />
+                    <Setter Property="HorizontalAlignment" Value="Right" />
+                </Style>
+            </Grid.Resources>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" Name="txtLoginRegisterHint">
+                Please Login
+            </TextBlock>
+
+            <TextBlock Grid.Row="1" Grid.Column="0">User Name</TextBlock>
+            <TextBox Name="txtUserName" Grid.Row="1" Grid.Column="1" Margin="20,0,0,0" />
+
+            <TextBlock Grid.Row="2" Grid.Column="0">Password</TextBlock>
+            <PasswordBox Name="txtPassword" Grid.Row="2" Grid.Column="1" Margin="20,0,0,0" />
+
+            <StackPanel Name="buttonPanel" Grid.Row="3" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Click="cmdRegister_Click">Register</Button>
+                <Button Click="cmdLogin_Click">Login</Button>
+            </StackPanel>
+
+            <Button Name="cmdSubmit" Grid.Row="3" Grid.Column="1" Visibility="Collapsed" Click="cmdSubmit_Click">Submit</Button>
+        </Grid>
+
+        <Canvas Name="mainScene" Visibility="Collapsed">
             <Image Name="playerImage" Canvas.Left="210" Canvas.Top="250" />
 
             <TextBlock Canvas.Left="20" Canvas.Top="10" Name="txtScore">Score: 0</TextBlock>
@@ -83,6 +131,8 @@
         </Canvas>
 
         <StackPanel Name="gameOverScene" Visibility="Collapsed" VerticalAlignment="Center" Margin="20">
+            <TextBlock Name="txtBestScore" />
+
             <Button Click="cmdRestart_Click" Margin="0,0,0,20">
                 <Button.Style>
                     <Style TargetType="Button">

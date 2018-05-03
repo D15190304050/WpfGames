@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Timers;
+using MySql.Data.MySqlClient;
 
 namespace PlaneWars
 {
@@ -96,6 +97,11 @@ namespace PlaneWars
         /// </summary>
         private bool spaceKeyPressed;
 
+        /// <summary>
+        /// Name of current player.
+        /// </summary>
+        private string userName;
+
         /* Sounds */
 
         /// <summary>
@@ -144,10 +150,27 @@ namespace PlaneWars
         private MediaPlayer musicBGM;
 
         /// <summary>
+        /// Connection to MySql Server.
+        /// </summary>
+        private MySqlConnection conn;
+
+        /// <summary>
+        /// An object which is used to send command text to MySql Server and get results.
+        /// </summary>
+        private MySqlCommand cmd;
+
+        /// <summary>
         /// Initializes the game plane wars.
         /// </summary>
         public MainWindow()
         {
+            // Create a connection object for database connection.
+            conn = new MySqlConnection(Settings.connectionString);
+
+            // Initialize the MySql command object.
+            cmd = new MySqlCommand();
+            cmd.Connection = conn;
+
             /* Load sounds. */
             
             musicPlayerShoot = new MediaPlayer();
@@ -192,7 +215,7 @@ namespace PlaneWars
             random = new Random();
 
             // This game is running.
-            running = true;
+            running = false;
 
             // No supply now.
             supply = null;
@@ -934,6 +957,8 @@ namespace PlaneWars
 
                 // Pauses the BGM.
                 musicBGM.Pause();
+
+                UpdateBestScore();
             }
         }
 
@@ -966,6 +991,257 @@ namespace PlaneWars
 
             // Restart the game.
             Restart();
+        }
+
+        /// <summary>
+        /// User login event handler.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmdLogin_Click(object sender, RoutedEventArgs e)
+        {
+            // Get user name.
+            string userName = txtUserName.Text;
+
+            // Show a warning if user name is empty.
+            if (string.IsNullOrEmpty(userName))
+            {
+                MessageBox.Show("You must enter your name", "Warning");
+                return;
+            }
+
+            // Get password.
+            string password = txtPassword.Password;
+
+            // Show a warning if password is empty.
+            if (string.IsNullOrEmpty(password))
+            {
+                MessageBox.Show("You must enter your password", "Warning");
+                return;
+            }
+
+            // Get real password of this player.
+            string realPassword = GetRealPassword(userName);
+
+            // Show a warning if no user has such name.
+            // Chech password otherwise.
+            if (string.IsNullOrEmpty(realPassword))
+            {
+                MessageBox.Show("No user has the name '" + userName + "'");
+                return;
+            }
+            else if (realPassword != password)
+            {
+                MessageBox.Show("You entered a wrong password");
+                return;
+            }
+            else
+            {
+                running = true;
+                loginScene.Visibility = Visibility.Collapsed;
+                mainScene.Visibility = Visibility.Visible;
+                this.userName = userName;
+            }
+        }
+
+        /// <summary>
+        /// Gets the real password of the given user name.
+        /// </summary>
+        /// <param name="userName">Name of the player.</param>
+        /// <returns></returns>
+        private string GetRealPassword(string userName)
+        {
+            // Configure the SQL query command.
+            cmd.CommandText = "SELECT Password FROM Users WHERE Name = '" + userName + "';";
+
+            // Try to get the password from database.
+            string realPassword = "";
+            try
+            {
+                conn.Open();
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    realPassword = reader[0].ToString();
+
+                reader.Close();
+            }
+            catch (MySqlException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+
+            // Return the password.
+            return realPassword;
+        }
+
+        /// <summary>
+        /// Updates best score of current player.
+        /// </summary>
+        private void UpdateBestScore()
+        {
+            // Get history best score.
+            int bestScore = GetBestScore();
+
+            // Update and save best score if this user gets a higher score.
+            if (bestScore < score)
+            {
+                bestScore = score;
+                SaveBestScore(bestScore);
+            }
+
+            // Show the best score.
+            txtBestScore.Text = "Your best score: " + bestScore;
+        }
+
+        /// <summary>
+        /// Gets the best score of current player.
+        /// </summary>
+        /// <returns>The best score of current player.</returns>
+        private int GetBestScore()
+        {
+            // Configure the SQL query command.
+            cmd.CommandText = "SELECT BestScore FROM Users WHERE Name = '" + userName + "';";
+
+            // Try to get the score from database.
+            int bestScore = 0;
+            try
+            {
+                conn.Open();
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    bestScore = int.Parse(reader[0].ToString());
+
+                reader.Close();
+            }
+            catch (MySqlException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+
+            // Return the player's best score.
+            return bestScore;
+        }
+
+        private void SaveBestScore(int bestScore)
+        {
+            cmd.CommandText = "UPDATE Users SET BestScore = " + bestScore + " WHERE Name = '" + userName + "';";
+
+            try
+            {
+                conn.Open();
+
+                cmd.ExecuteNonQuery();
+            }
+            catch (MySqlException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        /// <summary>
+        /// Shows the register interface.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmdRegister_Click(object sender, RoutedEventArgs e)
+        {
+            txtLoginRegisterHint.Text = Settings.RegisterHint;
+            cmdSubmit.Visibility = Visibility.Visible;
+            buttonPanel.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// User register submbit event handler.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmdSubmit_Click(object sender, RoutedEventArgs e)
+        {
+            // Get user name.
+            string userName = txtUserName.Text;
+
+            // Show a warning if user name is empty.
+            if (string.IsNullOrEmpty(userName))
+            {
+                MessageBox.Show("You must enter your name", "Warning");
+                return;
+            }
+
+            // Get password.
+            string password = txtPassword.Password;
+
+            // Show a warning if password is empty.
+            if (string.IsNullOrEmpty(password))
+            {
+                MessageBox.Show("You must enter your password", "Warning");
+                return;
+            }
+
+            // Try to add this player.
+            // If success, get back to login interface.
+            if (AddPlayer(userName, password))
+            {
+                txtLoginRegisterHint.Text = Settings.LoginHint;
+                cmdSubmit.Visibility = Visibility.Collapsed;
+                buttonPanel.Visibility = Visibility.Visible;
+            }
+        }
+
+        /// <summary>
+        /// Tries to add a new user to the database.
+        /// </summary>
+        /// <param name="userName">Name of the user.</param>
+        /// <param name="password">Password of the user.</param>
+        /// <returns>True if add successfully, otherwise, false.</returns>
+        private bool AddPlayer(string userName, string password)
+        {
+            // Show a warning if there is a user registered with the same name.
+            string realPassword = GetRealPassword(userName);
+            if (!string.IsNullOrEmpty(realPassword))
+            {
+                MessageBox.Show("This name has been used.", "Warning");
+                return false;
+            }
+
+            // Configure the SQL insert command.
+            cmd.CommandText = "INSERT INTO Users VALUE ('" + userName + "', '" + password + "', 0);";
+
+            // Try to add a new player by executing the command configured above.
+            // Return true if this command is executed successfully.
+            try
+            {
+                conn.Open();
+                cmd.ExecuteNonQuery();
+                MessageBox.Show("Add Success");
+                return true;
+            }
+            catch (MySqlException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+
+            // Return false if there is something wrong with the insert command.
+            return false;
         }
     }
 }

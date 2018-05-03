@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PlaneWars;
+using MySql.Data.MySqlClient;
 
 namespace UnitTest
 {
@@ -15,7 +16,8 @@ namespace UnitTest
             //Rectangle2DTest();
             //Line2DTest();
             //LineSegment2DTest();
-            Triangle2DTest();
+            //Triangle2DTest();
+            MySqlConnectionTest();
 
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
@@ -145,6 +147,34 @@ namespace UnitTest
             Console.WriteLine("Triangle2 contains point {0}: {1}", testPoint2, triangle2.Collide(testPoint2.X, testPoint2.Y));
             Console.WriteLine("Triangle2 contains point {0}: {1}", testPoint3, triangle2.Collide(testPoint3.X, testPoint3.Y));
             Console.WriteLine("Triangle2 contains point {0}: {1}", testPoint4, triangle2.Collide(testPoint4.X, testPoint4.Y));
+        }
+
+        private static void MySqlConnectionTest()
+        {
+            string connectionString = "Server = localhost; User = DinoStark; Password = non-feeling; Database = PlaneWars;";
+            MySqlConnection conn = new MySqlConnection(connectionString);
+            string query = "SELECT * FROM Users;";
+            MySqlCommand cmd = new MySqlCommand(query, conn);
+
+            try
+            {
+                conn.Open();
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                    Console.WriteLine($"ID = {reader[0]}, Name = {reader[1]}, Password = {reader["Password"]}");
+
+                reader.Close();
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.Message + "\n" + ex.StackTrace);
+            }
+            finally
+            {
+                conn.Close();
+            }
         }
     }
 }
