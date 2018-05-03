@@ -162,7 +162,7 @@ namespace PlaneWars
         /// <summary>
         /// Connection string for this game.
         /// </summary>
-        public const string connectionString = "Server = localhost; User = DinoStark; Password = non-feeling; Database = PlaneWars;";
+        public const string ConnectionString = "Server = localhost; User = DinoStark; Password = non-feeling; Database = PlaneWars;";
 
         public const string LoginHint = "Please Login";
         public const string RegisterHint = "Please Register";

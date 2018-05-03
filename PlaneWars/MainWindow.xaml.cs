@@ -165,7 +165,7 @@ namespace PlaneWars
         public MainWindow()
         {
             // Create a connection object for database connection.
-            conn = new MySqlConnection(Settings.connectionString);
+            conn = new MySqlConnection(Settings.ConnectionString);
 
             // Initialize the MySql command object.
             cmd = new MySqlCommand();
