@@ -116,7 +116,7 @@ namespace PlaneWars
             this.BombCount = Settings.PlayerBombMax;
             this.BulletKind = BulletKind.Bullet1;
 
-            // 
+            // Get the reference of the Image control.
             this.playerImage = playerImage;
 
             // Player is alive when initializing.

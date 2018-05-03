@@ -294,7 +294,7 @@ namespace PlaneWars
         }
 
         /// <summary>
-        /// Player BGM.
+        /// Plays BGM.
         /// </summary>
         private void PlayBgm()
         {
@@ -626,7 +626,7 @@ namespace PlaneWars
                 // Increase player's core.
                 score += enemy.Score;
 
-                // Player explosion sound.
+                // Play explosion sound.
                 switch (enemy.EnemyKind)
                 {
                     case EnemyKind.SmallEnemy:
@@ -725,7 +725,7 @@ namespace PlaneWars
                     else
                     {
                         // Player can get an extra bomb if current bomb count less than 3.
-                        if (player.BombCount < 3)
+                        if (player.BombCount < Settings.PlayerBombMax)
                         {
                             // Increase bomb count.
                             player.BombCount++;
