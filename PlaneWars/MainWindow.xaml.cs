@@ -261,7 +261,7 @@ namespace PlaneWars
         /// <param name="e"></param>
         private void ElapsedHandler(object sender, ElapsedEventArgs e)
         {
-            this.Dispatcher.Invoke(new Action(Update));
+            this.Dispatcher.Invoke(Update);
         }
 
         /// <summary>
