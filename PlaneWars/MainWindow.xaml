@@ -48,6 +48,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -70,6 +71,12 @@
             </StackPanel>
 
             <Button Name="cmdSubmit" Grid.Row="3" Grid.Column="1" Visibility="Collapsed" Click="cmdSubmit_Click">Submit</Button>
+
+            <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                Arrow key to move plane
+                <LineBreak/>
+                Space key to use bomb
+            </TextBlock>
         </Grid>
 
         <Canvas Name="mainScene" Visibility="Collapsed">
