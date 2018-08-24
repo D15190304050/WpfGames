@@ -169,7 +169,7 @@ namespace UnitTest
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message + "\n" + ex.StackTrace);
+                Console.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
             }
             finally
             {
