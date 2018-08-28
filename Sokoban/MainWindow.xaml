@@ -22,7 +22,7 @@
             <MenuItem Header="Game Play">
                 <MenuItem Header="New Game" Click="cmdNewGame_Click" />
                 <MenuItem Header="Restart This Level" Click="cmdRestartLevel_Click" />
-                <MenuItem Header="Save Progress" Click="cmdSaveProgress_Click" />
+                <MenuItem Header="Save Progress" Click="cmdSelectLevel_Click" />
                 <Separator />
                 <MenuItem Header="Exit" Click="cmdExit_Click" />
             </MenuItem>
@@ -63,7 +63,7 @@
 
             <Button Grid.Row="0" Click="cmdNewGame_Click">New Game</Button>
             <Button Grid.Row="1" Click="cmdRestartLevel_Click">Restart This Level</Button>
-            <Button Grid.Row="2" Click="cmdSaveProgress_Click">Save Progress</Button>
+            <Button Grid.Row="2" Click="cmdSelectLevel_Click">Select Level</Button>
             <Button Grid.Row="3" Click="cmdExit_Click">Exit</Button>
         </Grid>
     </Grid>

@@ -34,7 +34,7 @@ namespace Sokoban
 
         }
 
-        private void cmdSaveProgress_Click(object sender, RoutedEventArgs e)
+        private void cmdSelectLevel_Click(object sender, RoutedEventArgs e)
         {
 
         }
