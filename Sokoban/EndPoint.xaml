@@ -6,5 +6,7 @@
              xmlns:local="clr-namespace:Sokoban"
              mc:Ignorable="d" 
              d:DesignHeight="64" d:DesignWidth="64">
-    <Image Name="imgEndPoint" />
+    <Grid>
+        <Image Name="imgEndPoint" Width="32" Height="32" HorizontalAlignment="Center" />
+    </Grid>
 </UserControl>

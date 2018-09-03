@@ -71,6 +71,7 @@
     <Compile Include="EndPoint.xaml.cs">
       <DependentUpon>EndPoint.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EndPointColors.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

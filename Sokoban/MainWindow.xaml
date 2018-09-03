@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Sokoban"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        Loaded="Window_Loaded">
     
 
     <Grid Margin="10">
@@ -19,6 +20,12 @@
         </Grid.ColumnDefinitions>
 
         <Menu Grid.Row="0" Grid.ColumnSpan="2">
+            <Menu.Resources>
+                <Style TargetType="MenuItem">
+                    <Setter Property="FontSize" Value="14" />
+                </Style>
+            </Menu.Resources>
+
             <MenuItem Header="Game Play">
                 <MenuItem Header="New Game" Click="cmdNewGame_Click" />
                 <MenuItem Header="Restart This Level" Click="cmdRestartLevel_Click" />
@@ -41,6 +48,7 @@
         </Menu>
 
         <Canvas Name="mainScene" Grid.Row="1" Grid.Column="0" Margin="5">
+            <local:EndPoint x:Name="imgEndPoint" EndPointColor="Beige" />
         </Canvas>
 
         <Grid Grid.Row="1" Grid.Column="1">

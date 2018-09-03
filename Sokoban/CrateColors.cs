@@ -9,6 +9,14 @@
         Gray,
         Purple,
         Red,
-        Yellow
+        Yellow,
+        DarkBeige,
+        DarkBlack,
+        DarkBlue,
+        DarkBrown,
+        DarkGray,
+        DarkPurple,
+        DarkRed,
+        DarkYellow,
     }
 }
