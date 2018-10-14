@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sokoban", "Sokoban\Sokoban.csproj", "{09D27C6E-F689-4320-A289-F9C4BC1D527F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PacMan", "PacMan\PacMan.csproj", "{74C74D2E-9805-4C89-B3F5-3FE8233CA4C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{09D27C6E-F689-4320-A289-F9C4BC1D527F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09D27C6E-F689-4320-A289-F9C4BC1D527F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09D27C6E-F689-4320-A289-F9C4BC1D527F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74C74D2E-9805-4C89-B3F5-3FE8233CA4C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74C74D2E-9805-4C89-B3F5-3FE8233CA4C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74C74D2E-9805-4C89-B3F5-3FE8233CA4C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74C74D2E-9805-4C89-B3F5-3FE8233CA4C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
