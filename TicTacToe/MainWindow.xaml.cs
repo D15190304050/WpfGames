@@ -37,6 +37,8 @@ namespace TicTacToe
 
             Image mark = new Image();
             mark.Source = new BitmapImage(new Uri("Images/o.png", UriKind.Relative));
+            mark.MaxHeight = 150;
+            mark.MaxWidth = 150;
             cmd.Content = mark;
         }
 
