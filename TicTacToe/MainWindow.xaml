@@ -5,7 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TicTacToe"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800">
+        Title="MainWindow" Height="600" Width="800"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <Image x:Key="TransparentImage" Source="Images/Transparent.bmp" />
+    </Window.Resources>
+
     <Grid Name="MainScene">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{Binding ElementName=MainScene, Path=Height}" />
@@ -14,11 +20,14 @@
 
         <!-- Game scene on the left side. -->
         <Border Grid.Column="0" BorderThickness="2" BorderBrush="CadetBlue">
-            <Grid>
+            <Grid ShowGridLines="True">
                 <Grid.Resources>
                     <Style TargetType="Button">
                         <Setter Property="Background" Value="Transparent" />
                         <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Foreground" Value="Transparent" />
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="VerticalAlignment" Value="Stretch" />
                         <!--<Setter Property="(Grid)" />-->
                     </Style>
                 </Grid.Resources>
@@ -36,15 +45,15 @@
 
                 <Image Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="3" Source="Images/background.png" />
 
-                <Button Grid.Row="0" Grid.Column="0" Tag="0,0" Click="PlayerMove" />
-                <Button Grid.Row="0" Grid.Column="1" Tag="0,1" Click="PlayerMove" />
-                <Button Grid.Row="0" Grid.Column="2" Tag="0,2" Click="PlayerMove" />
-                <Button Grid.Row="1" Grid.Column="0" Tag="1,0" Click="PlayerMove" />
-                <Button Grid.Row="1" Grid.Column="1" Tag="1,1" Click="PlayerMove" />
-                <Button Grid.Row="1" Grid.Column="2" Tag="1,2" Click="PlayerMove" />
-                <Button Grid.Row="2" Grid.Column="0" Tag="2,0" Click="PlayerMove" />
-                <Button Grid.Row="2" Grid.Column="1" Tag="2,1" Click="PlayerMove" />
-                <Button Grid.Row="2" Grid.Column="2" Tag="2,2" Click="PlayerMove" />
+                <Button Name="chessPosition00" Grid.Row="0" Grid.Column="0" Tag="0,0" Click="cmd_PlayerMove" Content="{StaticResource TransparentImage}" />
+                <Button Name="chessPosition01" Grid.Row="0" Grid.Column="1" Tag="0,1" Click="cmd_PlayerMove" Content="{StaticResource TransparentImage}" />
+                <Button Name="chessPosition02" Grid.Row="0" Grid.Column="2" Tag="0,2" Click="cmd_PlayerMove" Content="{StaticResource TransparentImage}" />
+                <Button Name="chessPosition10" Grid.Row="1" Grid.Column="0" Tag="1,0" Click="cmd_PlayerMove" Content="{StaticResource TransparentImage}" />
+                <Button Name="chessPosition11" Grid.Row="1" Grid.Column="1" Tag="1,1" Click="cmd_PlayerMove" Content="{StaticResource TransparentImage}" />
+                <Button Name="chessPosition12" Grid.Row="1" Grid.Column="2" Tag="1,2" Click="cmd_PlayerMove" Content="{StaticResource TransparentImage}" />
+                <Button Name="chessPosition20" Grid.Row="2" Grid.Column="0" Tag="2,0" Click="cmd_PlayerMove" Content="{StaticResource TransparentImage}" />
+                <Button Name="chessPosition21" Grid.Row="2" Grid.Column="1" Tag="2,1" Click="cmd_PlayerMove" Content="{StaticResource TransparentImage}" />
+                <Button Name="chessPosition22" Grid.Row="2" Grid.Column="2" Tag="2,2" Click="cmd_PlayerMove" Content="{StaticResource TransparentImage}" />
             </Grid>
         </Border>
 
@@ -100,8 +109,8 @@
                 </Border>
 
                 <TextBlock Margin="0,30,0,10" Foreground="Crimson">Choose Your Order</TextBlock>
-                <RadioButton GroupName="Order">AI First</RadioButton>
-                <RadioButton GroupName="Order">Player First</RadioButton>
+                <RadioButton Name="rbAiFirst" GroupName="Order">AI First</RadioButton>
+                <RadioButton Name="rbPlayerFirst" GroupName="Order">Player First</RadioButton>
                 <Button Name="cmdStartGame" Click="cmdStartGame_Click" Margin="10,20,10,0">Start New Game</Button>
             </StackPanel>
         </Grid>
