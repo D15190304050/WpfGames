@@ -27,7 +27,7 @@ namespace Sokoban
 
         private void cmdNewGame_Click(object sender, RoutedEventArgs e)
         {
-            
+            new LevelEditor().ShowDialog();
         }
         private void cmdRestartLevel_Click(object sender, RoutedEventArgs e)
         {
