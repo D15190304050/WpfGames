@@ -7,6 +7,37 @@
         mc:Ignorable="d"
         Title="LevelEditor" Height="450" Width="800">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="8*" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+
+        <Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Visibility="Hidden">
+            <MenuItem Header="Nothing" FontSize="14" />
+        </Menu>
+
+        <Border Grid.Row="1" Grid.Column="0" BorderBrush="Gray" BorderThickness="2">
+            <Canvas>
+
+            </Canvas>
+        </Border>
+
+        <Grid Grid.Row="1" Grid.Column="1" Margin="10,0,5,0">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Vertical">
+                <TextBlock Name="txtColor">Choose The color of</TextBlock>
+                <ComboBox Margin="0,5,0,0" Name="cbColorPicker" />
+
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

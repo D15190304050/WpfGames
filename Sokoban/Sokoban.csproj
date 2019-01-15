@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="VisibilityConverter.cs" />
     <Page Include="EndPoint.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -71,6 +72,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ColorConverter.cs" />
     <Compile Include="CrateColors.cs" />
     <Compile Include="EndPoint.xaml.cs">
       <DependentUpon>EndPoint.xaml</DependentUpon>
