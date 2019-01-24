@@ -7,12 +7,6 @@
         mc:Ignorable="d"
         Title="用户登录" Height="330" Width="450">
 
-    <Window.Resources>
-        <Style TargetType="TextBlock">
-
-        </Style>
-    </Window.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="2*" />
@@ -23,9 +17,9 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="2" Source="Images/Login_Background.jpg" />
+        <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="2" Source="Images/Login_Background.jpg" Stretch="Fill" />
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Margin="10, 20, 0,0" FontSize="36">
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Margin="10,20,30,0" FontSize="36" Foreground="LightGoldenrodYellow">
             在
             <LineBreak />
             线
@@ -37,7 +31,14 @@
             棋
         </TextBlock>
 
-        <Grid Grid.Row="0" Grid.Column="1">
+        <Grid Grid.Row="0" Grid.Column="1" Margin="0,40,0,0">
+            <Grid.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="FontSize" Value="28" />
+                    <Setter Property="Foreground" Value="#FFFFC900" />
+                </Style>
+            </Grid.Resources>
+
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
@@ -49,6 +50,29 @@
 
             <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">用户名</TextBlock>
             <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">密码</TextBlock>
+
+            <TextBox Grid.Row="0" Grid.Column="1" Name="txtUserName" VerticalAlignment="Center" FontSize="28" Margin="10,0,10,0" Opacity="0.6" />
+            <PasswordBox Grid.Row="1" Grid.Column="1" Name="passwordBox" VerticalAlignment="Center" FontSize="28" Margin="10,0,10,0" Opacity="0.6" />
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="Padding" Value="5" />
+                </Style>
+            </Grid.Resources>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Click="cmdRegister_Click">注册</Button>
+            <Button Grid.Column="1" Click="cmdLogin_Click">登陆</Button>
+            <Button Grid.Column="2" Click="cmdForgetPassword_Click">忘记密码</Button>
         </Grid>
     </Grid>
 </Window>

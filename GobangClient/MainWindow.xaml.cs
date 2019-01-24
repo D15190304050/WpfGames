@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Net;
+using System.Net.Sockets;
 
 namespace GobangClient
 {
@@ -20,19 +22,42 @@ namespace GobangClient
     /// </summary>
     public partial class MainWindow : Window
     {
-        /// <summary>
-        /// By convention, Gobang is a game played on 15*15 chessboard by two players.
-        /// </summary>
-        private const int ChessboardSize = 15;
+        private const string ServerIPAddress = "";
+        private const int ServerPort = 8086;
 
-        private ChessPiece[,] chessboard;
-
+        private Socket clientSocket;
 
         public MainWindow()
         {
-            chessboard = new ChessPiece[ChessboardSize, ChessboardSize];
-
             InitializeComponent();
+
+            //IPAddress serverIPAddress = IPAddress.Parse(ServerIPAddress);
+            //IPEndPoint serverEndPoint = new IPEndPoint(serverIPAddress, ServerPort);
+
+            //try
+            //{
+            //    clientSocket.Connect(serverEndPoint);
+            //}
+            //catch (SocketException e)
+            //{
+            //    MessageBox.Show(e.Message);
+            //}
+        }
+
+        private void cmdRegister_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void cmdLogin_Click(object sender, RoutedEventArgs e)
+        {
+            Window window = new MainScene();
+            window.Show();
+        }
+
+        private void cmdForgetPassword_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
