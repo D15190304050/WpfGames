@@ -53,6 +53,7 @@ namespace GobangClient
         {
             Window window = new MainScene();
             window.Show();
+            this.Close();
         }
 
         private void cmdForgetPassword_Click(object sender, RoutedEventArgs e)
