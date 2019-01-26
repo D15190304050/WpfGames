@@ -18,4 +18,26 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style TargetType="Ellipse" x:Key="BlackChessPieceStyle">
+        <Setter Property="Fill">
+            <Setter.Value>
+                <RadialGradientBrush RadiusX="1" RadiusY="1" GradientOrigin="0.7,0.3">
+                    <GradientStop Color="#FF554D4D" Offset="0" />
+                    <GradientStop Color="Black" Offset="1" />
+                </RadialGradientBrush>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Ellipse" x:Key="WhiteChessPieceStyle">
+        <Setter Property="Fill">
+            <Setter.Value>
+                <RadialGradientBrush RadiusX="1" RadiusY="1" GradientOrigin="0.7,0.3">
+                    <GradientStop Color="#FFF0FAFA" Offset="0" />
+                    <GradientStop Color="Gray" Offset="1" />
+                </RadialGradientBrush>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

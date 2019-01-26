@@ -25,13 +25,15 @@ namespace GobangClient
         private const int ChessboardSize = 15;
 
         private const string ChessPieceStyle = "ChessPieceStyle";
+        private const string BlackChessPieceStyle = "BlackChessPieceStyle";
+        private const string WhiteChessPieceStyle = "WhiteChessPieceStyle";
 
-        private Button[,] chessboard;
+        private ChessPiece[,] chessboard;
 
 
         public MainScene()
         {
-            chessboard = new Button[ChessboardSize, ChessboardSize];
+            chessboard = new ChessPiece[ChessboardSize, ChessboardSize];
 
             InitializeComponent();
         }
@@ -93,7 +95,7 @@ namespace GobangClient
                     chessPiece.SetValue(Button.StyleProperty, Application.Current.Resources[ChessPieceStyle]);
                     chessboardCanvas.Children.Add(chessPiece);
 
-                    chessboard[i, j] = chessPiece;
+                    chessPiece.Tag = i + "," + j;
                 }
             }
         }

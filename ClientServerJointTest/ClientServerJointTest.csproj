@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{EB9D373C-D36C-4962-998A-5D0412631DE1}</ProjectGuid>
+    <ProjectGuid>{3E127413-4C04-40EB-98AE-48CDD5C01043}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>GobangClient</RootNamespace>
-    <AssemblyName>GobangClient</AssemblyName>
+    <RootNamespace>ClientServerJointTest</RootNamespace>
+    <AssemblyName>ClientServerJointTest</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -55,15 +55,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="component\Theme\Styles.xaml">
+    <Compile Include="GobangServerWindow.xaml.cs">
+      <DependentUpon>GobangServerWindow.xaml</DependentUpon>
+    </Compile>
+    <Page Include="GobangServerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainScene.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="LoginWindow.xaml">
+    <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -71,12 +70,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ChessPiece.cs" />
-    <Compile Include="MainScene.xaml.cs">
-      <DependentUpon>MainScene.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="LoginWindow.xaml.cs">
-      <DependentUpon>LoginWindow.xaml</DependentUpon>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -107,12 +102,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Images\Gobang_Icon.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Images\Login_Background.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <ProjectReference Include="..\GobangClient\GobangClient.csproj">
+      <Project>{eb9d373c-d36c-4962-998a-5d0412631de1}</Project>
+      <Name>GobangClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GobangServer\GobangServer.csproj">
+      <Project>{5ef9e6e2-570c-4739-8033-84a2ef858494}</Project>
+      <Name>GobangServer</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

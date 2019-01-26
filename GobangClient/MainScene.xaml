@@ -12,12 +12,14 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Border Name="chessboardBorder" Grid.Row="0" BorderBrush="Black" BorderThickness="2" Margin="10" Width="{Binding ElementName=chessboardBorder, Path=ActualHeight}" HorizontalAlignment="Left">
+        <Border Name="chessboardBorder" Grid.Row="0" BorderBrush="Black" BorderThickness="2" Margin="10" Width="{Binding ElementName=chessboardBorder, Path=ActualHeight}" HorizontalAlignment="Left" Background="LightYellow">
             <Canvas Name="chessboardCanvas" />
         </Border>
+
+        
     </Grid>
 </Window>

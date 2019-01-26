@@ -18,30 +18,43 @@ using System.Net.Sockets;
 namespace GobangClient
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for LoginWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class LoginWindow : Window
     {
-        private const string ServerIPAddress = "";
+        private const string ServerIPAddress = "223.2.16.234";
         private const int ServerPort = 8086;
 
         private Socket clientSocket;
 
-        public MainWindow()
+        public LoginWindow()
         {
             InitializeComponent();
 
-            //IPAddress serverIPAddress = IPAddress.Parse(ServerIPAddress);
-            //IPEndPoint serverEndPoint = new IPEndPoint(serverIPAddress, ServerPort);
+            IPAddress serverIPAddress = IPAddress.Parse(ServerIPAddress);
+            IPEndPoint serverEndPoint = new IPEndPoint(serverIPAddress, ServerPort);
+            clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            //try
-            //{
-            //    clientSocket.Connect(serverEndPoint);
-            //}
-            //catch (SocketException e)
-            //{
-            //    MessageBox.Show(e.Message);
-            //}
+            try
+            {
+                clientSocket.BeginConnect(serverEndPoint, Connect, null);
+            }
+            catch (SocketException e)
+            {
+                MessageBox.Show(e.Message);
+            }
+        }
+
+        private void Connect(IAsyncResult asyncResult)
+        {
+            try
+            {
+                clientSocket.EndConnect(asyncResult);
+            }
+            catch (SocketException e)
+            {
+                MessageBox.Show(e.Message);
+            }
         }
 
         private void cmdRegister_Click(object sender, RoutedEventArgs e)
