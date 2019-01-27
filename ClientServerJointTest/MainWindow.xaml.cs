@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Reflection;
+using System.Threading;
 using GobangClient;
 
 namespace ClientServerJointTest
@@ -35,7 +36,7 @@ namespace ClientServerJointTest
             Assembly assembly = type.Assembly;
             Window window = (Window) assembly.CreateInstance(type.Namespace + "." + button.Tag);
 
-            window.Show();
+            window?.Show();
         }
 
         private void cmdStartGobangServer_Click(object sender, RoutedEventArgs e)
@@ -47,6 +48,7 @@ namespace ClientServerJointTest
         private void cmdStartGobangClient_Click(object sender, RoutedEventArgs e)
         {
             LoginWindow loginWindow = new LoginWindow();
+            //loginWindow.
             loginWindow.Show();
         }
     }

@@ -25,7 +25,6 @@ namespace GobangClient
         private const string ServerIPAddress = "223.2.16.234";
         private const int ServerPort = 8086;
 
-        private Socket clientSocket;
 
         public LoginWindow()
         {
@@ -33,11 +32,10 @@ namespace GobangClient
 
             IPAddress serverIPAddress = IPAddress.Parse(ServerIPAddress);
             IPEndPoint serverEndPoint = new IPEndPoint(serverIPAddress, ServerPort);
-            clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             try
             {
-                clientSocket.BeginConnect(serverEndPoint, Connect, null);
+                //App.ClientSocket.BeginConnect(serverEndPoint, Connect, null);
             }
             catch (SocketException e)
             {
@@ -49,7 +47,7 @@ namespace GobangClient
         {
             try
             {
-                clientSocket.EndConnect(asyncResult);
+                App.ClientSocket.EndConnect(asyncResult);
             }
             catch (SocketException e)
             {
@@ -59,7 +57,7 @@ namespace GobangClient
 
         private void cmdRegister_Click(object sender, RoutedEventArgs e)
         {
-
+            new RegisterWindow().ShowDialog();
         }
 
         private void cmdLogin_Click(object sender, RoutedEventArgs e)
@@ -72,6 +70,14 @@ namespace GobangClient
         private void cmdForgetPassword_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        // This method is necessary only when this window is tested in other projects.
+        // The following code will deal with the path mapping problem.
+        // 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.Background = new ImageBrush(new BitmapImage(new Uri("Images/Login_Background.jpg", UriKind.Relative)));
         }
     }
 }

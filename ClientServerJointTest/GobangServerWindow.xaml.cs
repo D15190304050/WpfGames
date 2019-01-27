@@ -36,7 +36,7 @@ namespace ClientServerJointTest
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            GameServer.serverSocket.Disconnect(true);
+            //GameServer.ServerSocket.Disconnect(true);
         }
     }
 }

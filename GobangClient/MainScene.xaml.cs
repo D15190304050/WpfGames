@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Newtonsoft.Json;
 
 namespace GobangClient
 {
@@ -90,6 +91,7 @@ namespace GobangClient
                     Canvas.SetTop(chessPiece, chessboardRowHeight * j - chessboardRowHeight / 2);
                     chessPiece.Height = chessboardRowHeight;
                     chessPiece.Width = chessboardColumnWidth;
+                    chessPiece.Click += cmdPutChessPiece_Click;
 
                     // Set the pre-defined style for buttons of chess pieces.
                     chessPiece.SetValue(Button.StyleProperty, Application.Current.Resources[ChessPieceStyle]);
@@ -98,6 +100,12 @@ namespace GobangClient
                     chessPiece.Tag = i + "," + j;
                 }
             }
+        }
+
+        // Put the chess piece to the specified position.
+        private void cmdPutChessPiece_Click(object sender, RoutedEventArgs e)
+        {
+            
         }
     }
 }

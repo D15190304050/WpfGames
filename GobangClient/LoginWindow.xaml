@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GobangClient"
         mc:Ignorable="d"
-        Title="用户登录" Height="330" Width="450">
+        Title="用户登录" Height="330" Width="450"
+        Loaded="Window_Loaded">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -17,6 +18,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
+        <!-- Leave the following background image tag here to make the color configuration easy. -->
         <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="2" Source="Images/Login_Background.jpg" Stretch="Fill" />
 
         <TextBlock Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Margin="10,20,30,0" FontSize="36" Foreground="LightGoldenrodYellow">

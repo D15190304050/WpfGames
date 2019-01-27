@@ -1,0 +1,105 @@
+﻿<Window x:Class="GobangClient.RegisterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GobangClient"
+        mc:Ignorable="d"
+        Title="RegisterWindow" Height="370" Width="500">
+
+    <Window.Resources>
+        <Style TargetType="TextBlock" x:Key="TextHintStyle">
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="Margin" Value="0,15,0,15" />
+        </Style>
+
+        <Style TargetType="Control" x:Key="InputBoxStyle">
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
+        <ControlTemplate x:Key="ErrorTemplate">
+            <DockPanel LastChildFill="true">
+                <Border Background="Red" DockPanel.Dock="right" Margin="5,0,0,0" Width="20" Height="20" CornerRadius="10"
+                        ToolTip="{Binding ElementName=customAdorner, Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">
+                    <TextBlock Text="!" VerticalAlignment="center" HorizontalAlignment="center" FontWeight="Bold" Foreground="white">
+                    </TextBlock>
+                </Border>
+                <AdornedElementPlaceholder Name="customAdorner" VerticalAlignment="Center" >
+                    <Border BorderBrush="red" BorderThickness="1" />
+                </AdornedElementPlaceholder>
+            </DockPanel>
+        </ControlTemplate>
+
+        <Style TargetType="TextBox" x:Key="TextBoxValidationStyle">
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="Margin" Value="0,15,0,15" />
+            <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ErrorTemplate}" />
+
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <local:AccountInfo x:Key="AccountInfo" />
+    </Window.Resources>
+
+    <Grid Margin="20" Name="gridAccountInfo" DataContext="{StaticResource AccountInfo}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" FontSize="40">欢迎注册在线五子棋</TextBlock>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource ResourceKey=TextHintStyle}">账号</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource ResourceKey=TextHintStyle}">密码</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource ResourceKey=TextHintStyle}">邮箱</TextBlock>
+
+        <!-- 账号即用户名，长度3-20个字符，仅允许字母和数字，以字母开头，不允许与已注册用户重复 -->
+        <TextBox Name="txtAccount" Grid.Row="1" Grid.Column="1" Margin="10" ToolTip="账号即用户名，长度3-20个字符，仅允许字母和数字，以字母开头，不允许与已注册用户重复" Style="{StaticResource TextBoxValidationStyle}">
+            <TextBox.Text>
+                <Binding Path="Account" NotifyOnValidationError="True">
+                    <Binding.ValidationRules>
+                        <local:AccountRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <PasswordBox Name="pbPassword" Grid.Row="2" Grid.Column="1" Margin="10" Style="{StaticResource ResourceKey=InputBoxStyle}" ToolTip="长度8-20个字符，仅允许字母和数字，以字母开头" />
+        <TextBox Name="txtMailAddress" Grid.Row="3" Grid.Column="1" Margin="10" Style="{StaticResource ResourceKey=InputBoxStyle}" ToolTip="可以通过该邮箱找回密码" />
+
+        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,30,0,0" Click="cmdRegister_Click">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Grid>
+                                    <Rectangle Name="cmdLoginBackground" RadiusX="5" RadiusY="5" Fill="#FF2AB9F8" />
+                                    <TextBlock HorizontalAlignment="Center" FontSize="22" Foreground="White" Padding="4">立即注册</TextBlock>
+                                </Grid>
+
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="cmdLoginBackground" Property="Fill" Value="#FF18D5ED"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Button.Style>
+        </Button>
+    </Grid>
+</Window>

@@ -5,6 +5,8 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Net;
+using System.Net.Sockets;
 
 namespace GobangClient
 {
@@ -13,5 +15,11 @@ namespace GobangClient
     /// </summary>
     public partial class App : Application
     {
+        public static Socket ClientSocket { get; }
+
+        static App()
+        {
+            ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        }
     }
 }
