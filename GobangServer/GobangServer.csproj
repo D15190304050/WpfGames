@@ -59,5 +59,8 @@
   <ItemGroup>
     <Folder Include="Doc\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="DatabaseConfiguration.sql" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
