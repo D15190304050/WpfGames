@@ -35,7 +35,7 @@ namespace GobangClient
 
             try
             {
-                //App.ClientSocket.BeginConnect(serverEndPoint, Connect, null);
+                App.ClientSocket.BeginConnect(serverEndPoint, Connect, null);
             }
             catch (SocketException e)
             {

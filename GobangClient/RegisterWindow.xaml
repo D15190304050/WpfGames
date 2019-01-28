@@ -13,16 +13,11 @@
             <Setter Property="Margin" Value="0,15,0,15" />
         </Style>
 
-        <Style TargetType="Control" x:Key="InputBoxStyle">
-            <Setter Property="FontSize" Value="22" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-        </Style>
-
         <ControlTemplate x:Key="ErrorTemplate">
-            <DockPanel LastChildFill="true">
-                <Border Background="Red" DockPanel.Dock="right" Margin="5,0,0,0" Width="20" Height="20" CornerRadius="10"
+            <DockPanel LastChildFill="True">
+                <Border Background="Red" DockPanel.Dock="Right" Margin="5,0,0,0" Width="20" Height="20" CornerRadius="10"
                         ToolTip="{Binding ElementName=customAdorner, Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">
-                    <TextBlock Text="!" VerticalAlignment="center" HorizontalAlignment="center" FontWeight="Bold" Foreground="white">
+                    <TextBlock Text="!" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White">
                     </TextBlock>
                 </Border>
                 <AdornedElementPlaceholder Name="customAdorner" VerticalAlignment="Center" >
@@ -32,9 +27,27 @@
         </ControlTemplate>
 
         <Style TargetType="TextBox" x:Key="TextBoxValidationStyle">
-            <Setter Property="FontSize" Value="22" />
-            <Setter Property="Margin" Value="0,15,0,15" />
-            <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ErrorTemplate}" />
+            <Style.Setters>
+                <Setter Property="FontSize" Value="22" />
+                <Setter Property="Margin" Value="0,15,0,15" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ErrorTemplate}" />
+            </Style.Setters>
+
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="PasswordBox" x:Key="PasswordBoxValidationStyle">
+            <Style.Setters>
+                <Setter Property="FontSize" Value="22" />
+                <Setter Property="Margin" Value="0,15,0,15" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ErrorTemplate}" />
+            </Style.Setters>
 
             <Style.Triggers>
                 <Trigger Property="Validation.HasError" Value="True">
@@ -52,6 +65,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -66,20 +80,51 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource ResourceKey=TextHintStyle}">邮箱</TextBlock>
 
         <!-- 账号即用户名，长度3-20个字符，仅允许字母和数字，以字母开头，不允许与已注册用户重复 -->
-        <TextBox Name="txtAccount" Grid.Row="1" Grid.Column="1" Margin="10" ToolTip="账号即用户名，长度3-20个字符，仅允许字母和数字，以字母开头，不允许与已注册用户重复" Style="{StaticResource TextBoxValidationStyle}">
+        <TextBox Name="txtAccount" Grid.Row="1" Grid.Column="1" Margin="10" Style="{StaticResource TextBoxValidationStyle}">
+            <TextBox.ToolTip>
+                账号即用户名，长度3-20个字符，仅允许字母和数字，以字母开头，不允许与已注册用户重复
+            </TextBox.ToolTip>
+
             <TextBox.Text>
                 <Binding Path="Account" NotifyOnValidationError="True">
                     <Binding.ValidationRules>
-                        <local:AccountRule />
+                        <local:AccountNamingRule />
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>
         </TextBox>
 
-        <PasswordBox Name="pbPassword" Grid.Row="2" Grid.Column="1" Margin="10" Style="{StaticResource ResourceKey=InputBoxStyle}" ToolTip="长度8-20个字符，仅允许字母和数字，以字母开头" />
-        <TextBox Name="txtMailAddress" Grid.Row="3" Grid.Column="1" Margin="10" Style="{StaticResource ResourceKey=InputBoxStyle}" ToolTip="可以通过该邮箱找回密码" />
+        <PasswordBox Name="passwordBox" Grid.Row="2" Grid.Column="1" Margin="10" Style="{StaticResource ResourceKey=PasswordBoxValidationStyle}" local:PasswordBoxHelper.Attach="True">
+            <PasswordBox.ToolTip>
+                长度8-20个字符，仅允许字母和数字，不允许纯数字
+            </PasswordBox.ToolTip>
 
-        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,30,0,0" Click="cmdRegister_Click">
+            <local:PasswordBoxHelper.Password>
+                <Binding Path="Password" NotifyOnValidationError="True" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <local:PasswordRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </local:PasswordBoxHelper.Password>
+        </PasswordBox>
+
+        <TextBox Name="txtMailAddress" Grid.Row="3" Grid.Column="1" Margin="10" Style="{StaticResource ResourceKey=TextBoxValidationStyle}">
+            <TextBox.ToolTip>
+                可以通过该邮箱找回密码
+            </TextBox.ToolTip>
+
+            <TextBox.Text>
+                <Binding Path="MailAddress" NotifyOnValidationError="True">
+                    <Binding.ValidationRules>
+                        <local:MailAddressValidationRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <TextBlock Name="txtErrorMessage" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" FontSize="18" Foreground="Red" />
+
+        <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,30,0,0" Click="cmdRegister_Click">
             <Button.Style>
                 <Style TargetType="Button">
                     <Setter Property="Template">

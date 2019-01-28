@@ -20,13 +20,21 @@ namespace ClientServerJointTest
     /// </summary>
     public partial class GobangServerWindow : Window
     {
+        private bool started;
+
         public GobangServerWindow()
         {
+            started = false;
             InitializeComponent();
         }
 
         private void cmdStartServer_Click(object sender, RoutedEventArgs e)
         {
+            if (started)
+                return;
+            started = true;
+
+            lstServerOutput.Items.Add("服务器已启动");
             GameServer.Report += s =>
             {
                 this.Dispatcher.Invoke(() => lstServerOutput.Items.Add(s));
@@ -36,7 +44,7 @@ namespace ClientServerJointTest
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            //GameServer.ServerSocket.Disconnect(true);
+            GameServer.Close();
         }
     }
 }

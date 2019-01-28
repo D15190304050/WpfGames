@@ -10,12 +10,12 @@ using System.Windows.Controls;
 
 namespace GobangClient
 {
-    public class AccountRule : ValidationRule
+    public class AccountNamingRule : ValidationRule
     {
+        // Validates following rules:
+        // 账号即用户名，长度3-20个字符，仅允许字母和数字，以字母开头，不允许与已注册用户重复.
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            MessageBox.Show("123");
-
             string account = value as string;
 
             if (account == null)

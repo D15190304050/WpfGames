@@ -48,7 +48,6 @@ namespace ClientServerJointTest
         private void cmdStartGobangClient_Click(object sender, RoutedEventArgs e)
         {
             LoginWindow loginWindow = new LoginWindow();
-            //loginWindow.
             loginWindow.Show();
         }
     }
