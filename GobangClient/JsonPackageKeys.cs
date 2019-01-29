@@ -11,7 +11,7 @@ namespace GobangClient
         public const string Type = "Type";
         public const string Body = "Body";
         public const string Error = "Error";
-        public const string DetailedMessage = "DetailedMessage";
+        public const string DetailedError = "DetailedError";
         public const string AccountAlreadyExists = "Account already exists";
         public const string Success = "Success";
     }

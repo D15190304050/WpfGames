@@ -124,7 +124,7 @@
 
         <TextBlock Name="txtErrorMessage" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" FontSize="18" Foreground="Red" />
 
-        <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,30,0,0" Click="cmdRegister_Click">
+        <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,0" Click="cmdRegister_Click">
             <Button.Style>
                 <Style TargetType="Button">
                     <Setter Property="Template">

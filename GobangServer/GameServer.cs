@@ -85,7 +85,9 @@ namespace GobangServer
             // Place a "?" here to prevent an exception being thrown if this method is called before the Start() method.
             serverWorker?.CancelAsync();
 
-
+            // Terminate all client threads.
+            foreach (ClientInfo client in clientInfos)
+                client.Worker.CancelAsync();
         }
 
         private static void DoClientWork(object sender, DoWorkEventArgs e)
@@ -101,7 +103,8 @@ namespace GobangServer
                     string jsonText = Encoding.UTF8.GetString(receiveBuffer, 0, receivedLength);
                     JObject jsonPackage = JObject.Parse(jsonText);
 
-                    Report?.Invoke("123");
+                    // If Report event is raised here, the whole server program will be blocked.
+                    // I don't know why this happened and I will fix this.
                     //Report?.Invoke(jsonPackage[JsonPackageKeys.Type].ToString());
 
                     switch (jsonPackage[JsonPackageKeys.Type].ToString())
@@ -130,7 +133,7 @@ namespace GobangServer
                     Type = "Error",
                     Body = new
                     {
-                        DetailedError = "Account already exists"
+                        DetailedError = JsonPackageKeys.AccountAlreadyExists
                     }
                 });
             }

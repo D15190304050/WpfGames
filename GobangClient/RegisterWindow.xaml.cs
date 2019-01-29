@@ -92,7 +92,7 @@ namespace GobangClient
         // Use a method to encapsulate this function to enhance the readability.
         private void DisplayErrorMessage(JObject responseMessage)
         {
-            txtErrorMessage.Text = responseMessage[JsonPackageKeys.Body][JsonPackageKeys.DetailedMessage].ToString();
+            txtErrorMessage.Text = responseMessage[JsonPackageKeys.Body][JsonPackageKeys.DetailedError].ToString();
         }
 
         // Calculates and returns the MD5 hash value of the specified string password.

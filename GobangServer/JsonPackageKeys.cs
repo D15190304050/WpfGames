@@ -14,5 +14,6 @@ namespace GobangServer
         public const string Account = "Account";
         public const string Password = "Password";
         public const string MailAddress = "MailAddress";
+        public const string AccountAlreadyExists = "用户名已存在";
     }
 }
