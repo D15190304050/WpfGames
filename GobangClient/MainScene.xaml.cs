@@ -94,7 +94,8 @@ namespace GobangClient
                     chessPiece.Click += cmdPutChessPiece_Click;
 
                     // Set the pre-defined style for buttons of chess pieces.
-                    chessPiece.SetValue(Button.StyleProperty, Application.Current.Resources[ChessPieceStyle]);
+                    object chessPieceStyle = Application.Current.Resources[ChessPieceStyle];
+                    chessPiece.SetValue(Button.StyleProperty, chessPieceStyle);
                     chessboardCanvas.Children.Add(chessPiece);
 
                     chessPiece.Tag = i + "," + j;

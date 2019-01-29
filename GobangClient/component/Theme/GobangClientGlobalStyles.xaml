@@ -1,0 +1,43 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:GobangClient.component.Theme">
+    <Style TargetType="Button" x:Key="ChessPieceStyle">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Grid>
+                        <Ellipse Name="nonClickedChessPiece" Fill="Transparent" />
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="nonClickedChessPiece" Property="Fill" Value="#FF4EE2F5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Ellipse" x:Key="BlackChessPieceStyle">
+        <Setter Property="Fill">
+            <Setter.Value>
+                <RadialGradientBrush RadiusX="1" RadiusY="1" GradientOrigin="0.7,0.3">
+                    <GradientStop Color="#FF554D4D" Offset="0" />
+                    <GradientStop Color="Black" Offset="1" />
+                </RadialGradientBrush>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Ellipse" x:Key="WhiteChessPieceStyle">
+        <Setter Property="Fill">
+            <Setter.Value>
+                <RadialGradientBrush RadiusX="1" RadiusY="1" GradientOrigin="0.7,0.3">
+                    <GradientStop Color="#FFF0FAFA" Offset="0" />
+                    <GradientStop Color="Gray" Offset="1" />
+                </RadialGradientBrush>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

@@ -14,6 +14,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Net;
 using System.Net.Sockets;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GobangClient
 {
@@ -22,32 +24,17 @@ namespace GobangClient
     /// </summary>
     public partial class LoginWindow : Window
     {
-        private const string ServerIPAddress = "223.2.16.234";
-        private const int ServerPort = 8086;
-
+        private AccountInfo accountToCommit;
 
         public LoginWindow()
         {
             InitializeComponent();
 
-            IPAddress serverIPAddress = IPAddress.Parse(ServerIPAddress);
-            IPEndPoint serverEndPoint = new IPEndPoint(serverIPAddress, ServerPort);
+            accountToCommit = new AccountInfo();
 
             try
             {
-                App.ClientSocket.BeginConnect(serverEndPoint, Connect, null);
-            }
-            catch (SocketException e)
-            {
-                MessageBox.Show(e.Message);
-            }
-        }
-
-        private void Connect(IAsyncResult asyncResult)
-        {
-            try
-            {
-                App.ClientSocket.EndConnect(asyncResult);
+                Communication.Start();
             }
             catch (SocketException e)
             {
@@ -62,9 +49,27 @@ namespace GobangClient
 
         private void cmdLogin_Click(object sender, RoutedEventArgs e)
         {
-            Window window = new MainScene();
-            window.Show();
-            this.Close();
+            if (txtAccount.Text.Length == 0 || passwordBox.Password.Length == 0)
+                txtErrorMessage.Text = "用户名和密码都不能为空";
+            else
+            {
+                txtErrorMessage.Text = "";
+
+                accountToCommit.Account = txtAccount.Text;
+                accountToCommit.Password = Encrypter.Encrypt(passwordBox.Password);
+                accountToCommit.MailAddress = "";
+                Communication.Send(JsonPackageKeys.Login, accountToCommit);
+
+                JObject responseMessage = Communication.Receive();
+                switch (responseMessage[JsonPackageKeys.Type].ToString())
+                {
+                    
+                }
+
+                Window window = new MainScene();
+                window.Show();
+                this.Close();
+            }
         }
 
         private void cmdForgetPassword_Click(object sender, RoutedEventArgs e)

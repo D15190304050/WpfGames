@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="ClientState.cs" />
     <Compile Include="ClientInfo.cs" />
+    <Compile Include="Communication.cs" />
     <Compile Include="GameServer.cs" />
     <Compile Include="JsonPackageKeys.cs" />
     <Compile Include="Program.cs" />

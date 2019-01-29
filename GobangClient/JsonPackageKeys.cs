@@ -14,5 +14,7 @@ namespace GobangClient
         public const string DetailedError = "DetailedError";
         public const string AccountAlreadyExists = "Account already exists";
         public const string Success = "Success";
+        public const string Login = "Login";
+        public const string Register = "Register";
     }
 }

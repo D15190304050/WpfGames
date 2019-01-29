@@ -112,6 +112,9 @@ namespace GobangServer
                         case JsonPackageKeys.Register:
                             Register(jsonPackage[JsonPackageKeys.Body], clientSocket);
                             break;
+                        case JsonPackageKeys.Login:
+                            Login(jsonPackage[JsonPackageKeys.Body], clientSocket);
+                            break;
                     }
                 }
             }
@@ -119,23 +122,17 @@ namespace GobangServer
 
         private static void Register(JToken accountInfo, Socket clientSocket)
         {
-            JObject registerResponseMessage;
-            byte[] registerResponseBytes;
-
             string account = accountInfo[JsonPackageKeys.Account].ToString();
 
             // Send error message if the account name already exits.
             // Otherwise, create the account.
             if (SqlExecutor.Exists(account))
             {
-                registerResponseMessage = JObject.FromObject(new
+                object errorMessage = new
                 {
-                    Type = "Error",
-                    Body = new
-                    {
-                        DetailedError = JsonPackageKeys.AccountAlreadyExists
-                    }
-                });
+                    DetailedError = JsonPackageKeys.AccountAlreadyExists
+                };
+                Communication.Send(clientSocket, JsonPackageKeys.Error, errorMessage);
             }
             else
             {
@@ -143,15 +140,13 @@ namespace GobangServer
                 string mailAddress = accountInfo[JsonPackageKeys.MailAddress].ToString();
 
                 SqlExecutor.CreateAccount(account, password, mailAddress);
-                registerResponseMessage = JObject.FromObject(new
-                {
-                    Type = "Success",
-                    Body = ""
-                });
+                Communication.Send(clientSocket, JsonPackageKeys.Success, "");
             }
+        }
 
-            registerResponseBytes = Encoding.UTF8.GetBytes(registerResponseMessage.ToString());
-            clientSocket.Send(registerResponseBytes);
+        private static void Login(JToken accountInfo, Socket clientSocket)
+        {
+
         }
     }
 }

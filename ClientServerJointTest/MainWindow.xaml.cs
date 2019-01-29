@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using System.Reflection;
 using System.Threading;
 using GobangClient;
+using System.IO;
 
 namespace ClientServerJointTest
 {

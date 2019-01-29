@@ -59,14 +59,5 @@ namespace GobangClient.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Type.
-        /// </summary>
-        internal static string Type {
-            get {
-                return ResourceManager.GetString("Type", resourceCulture);
-            }
-        }
     }
 }

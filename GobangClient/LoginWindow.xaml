@@ -8,9 +8,21 @@
         Title="用户登录" Height="330" Width="450"
         Loaded="Window_Loaded">
 
+    <Window.Resources>
+        <Style TargetType="Control" x:Key="InputControlStyle">
+            <Style.Setters>
+                <Setter Property="FontSize" Value="28" />
+                <Setter Property="Margin" Value="10,0,30,0" />
+                <Setter Property="Opacity" Value="0.6" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style.Setters>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="2*" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -19,9 +31,9 @@
         </Grid.ColumnDefinitions>
 
         <!-- Leave the following background image tag here to make the color configuration easy. -->
-        <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="2" Source="Images/Login_Background.jpg" Stretch="Fill" />
+        <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Grid.ColumnSpan="2" Source="Images/Login_Background.jpg" Stretch="Fill" />
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Margin="10,20,30,0" FontSize="36" Foreground="LightGoldenrodYellow">
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Margin="10,20,30,0" FontSize="36" Foreground="LightGoldenrodYellow">
             在
             <LineBreak />
             线
@@ -53,11 +65,14 @@
             <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">用户名</TextBlock>
             <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">密码</TextBlock>
 
-            <TextBox Grid.Row="0" Grid.Column="1" Name="txtUserName" VerticalAlignment="Center" FontSize="28" Margin="10,0,10,0" Opacity="0.6" />
-            <PasswordBox Grid.Row="1" Grid.Column="1" Name="passwordBox" VerticalAlignment="Center" FontSize="28" Margin="10,0,10,0" Opacity="0.6" />
+            <TextBox Grid.Row="0" Grid.Column="1" Name="txtAccount" Style="{StaticResource ResourceKey=InputControlStyle}" />
+
+            <PasswordBox Grid.Row="1" Grid.Column="1" Name="passwordBox" Style="{StaticResource ResourceKey=InputControlStyle}" />
         </Grid>
 
-        <Grid Grid.Row="1" Grid.Column="1">
+        <TextBlock Grid.Row="1" Grid.Column="1" Name="txtErrorMessage" Foreground="Red" FontSize="28" VerticalAlignment="Bottom" />
+
+        <Grid Grid.Row="2" Grid.Column="1">
             <Grid.Resources>
                 <Style TargetType="Button">
                     <Setter Property="VerticalAlignment" Value="Center" />

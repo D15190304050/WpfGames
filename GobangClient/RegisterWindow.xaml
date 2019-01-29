@@ -21,7 +21,7 @@
                     </TextBlock>
                 </Border>
                 <AdornedElementPlaceholder Name="customAdorner" VerticalAlignment="Center" >
-                    <Border BorderBrush="red" BorderThickness="1" />
+                    <Border BorderBrush="Red" BorderThickness="1" />
                 </AdornedElementPlaceholder>
             </DockPanel>
         </ControlTemplate>
@@ -82,7 +82,7 @@
         <!-- 账号即用户名，长度3-20个字符，仅允许字母和数字，以字母开头，不允许与已注册用户重复 -->
         <TextBox Name="txtAccount" Grid.Row="1" Grid.Column="1" Margin="10" Style="{StaticResource TextBoxValidationStyle}">
             <TextBox.ToolTip>
-                账号即用户名，长度3-20个字符，仅允许字母和数字，以字母开头，不允许与已注册用户重复
+                账号即用户名，长度3-20个字符，仅允许字母和数字，以字母开头，字母区分大小写，不允许与已注册用户重复
             </TextBox.ToolTip>
 
             <TextBox.Text>
@@ -96,7 +96,7 @@
 
         <PasswordBox Name="passwordBox" Grid.Row="2" Grid.Column="1" Margin="10" Style="{StaticResource ResourceKey=PasswordBoxValidationStyle}" local:PasswordBoxHelper.Attach="True">
             <PasswordBox.ToolTip>
-                长度8-20个字符，仅允许字母和数字，不允许纯数字
+                长度8-20个字符，仅允许字母和数字，不允许纯数字，字母区分大小写
             </PasswordBox.ToolTip>
 
             <local:PasswordBoxHelper.Password>
