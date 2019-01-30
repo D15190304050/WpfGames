@@ -70,7 +70,7 @@ namespace GobangClient
                         break;
 
                     default:
-                        MessageBox.Show("未知错误" + responseMessage);
+                        MessageBox.Show("未知错误\n" + responseMessage);
                         break;
                 }
             }

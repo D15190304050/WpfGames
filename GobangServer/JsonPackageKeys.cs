@@ -19,5 +19,7 @@ namespace GobangServer
         public const string Error = "Error";
         public const string Success = "Success";
         public const string DetailedError = "DetailedError";
+        public const string NoSuchAccount = "该用户不存在";
+        public const string WrongPassword = "密码错误";
     }
 }

@@ -16,7 +16,7 @@ namespace GobangServer
     {
         public const string LocalhostIPAddress = "223.2.16.234";
         private const int ServerPort = 8086;
-        
+
         public static Socket ServerSocket;
         private static LinkedList<ClientInfo> clientInfos;
 
@@ -97,7 +97,7 @@ namespace GobangServer
                 Socket clientSocket = clientInfo.ClientSocket;
                 byte[] receiveBuffer = new byte[1024];
 
-                for (;;)
+                for (; ; )
                 {
                     int receivedLength = clientSocket.Receive(receiveBuffer);
                     string jsonText = Encoding.UTF8.GetString(receiveBuffer, 0, receivedLength);
@@ -146,7 +146,31 @@ namespace GobangServer
 
         private static void Login(JToken accountInfo, Socket clientSocket)
         {
+            string account = accountInfo[JsonPackageKeys.Account].ToString();
 
+            if (!SqlExecutor.Exists(account))
+            {
+                object errorMessage = new
+                {
+                    DetailedError = JsonPackageKeys.NoSuchAccount
+                };
+                Communication.Send(clientSocket, JsonPackageKeys.Error, errorMessage);
+            }
+            else
+            {
+                string password = accountInfo[JsonPackageKeys.Password].ToString();
+
+                if (!SqlExecutor.ValidatePassword(account, password))
+                {
+                    object errorMessage = new
+                    {
+                        DetailedError = JsonPackageKeys.WrongPassword
+                    };
+                    Communication.Send(clientSocket, JsonPackageKeys.Error, errorMessage);
+                }
+                else
+                    Communication.Send(clientSocket, JsonPackageKeys.Success, "");
+            }
         }
     }
 }

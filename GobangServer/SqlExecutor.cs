@@ -50,5 +50,21 @@ namespace GobangServer
             cmdInsert.ExecuteNonQuery();
             Connection.Close();
         }
+
+        public static bool ValidatePassword(string account, string password)
+        {
+            string cmdSelectText = "SELECT Password FROM Users WHERE Account = '" + account + "';";
+            SqlCommand cmdSelect = new SqlCommand(cmdSelectText, Connection);
+
+            // No try-catch-finally here, exception will be thrown to the caller of this method.
+            Connection.Open();
+            SqlDataReader reader = cmdSelect.ExecuteReader();
+            reader.Read();
+            string realPassword = reader[0].ToString();
+            reader.Close();
+            Connection.Close();
+
+            return password == realPassword;
+        }
     }
 }

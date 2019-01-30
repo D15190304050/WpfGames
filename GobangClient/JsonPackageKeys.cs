@@ -16,5 +16,7 @@ namespace GobangClient
         public const string Success = "Success";
         public const string Login = "Login";
         public const string Register = "Register";
+        public const string NoSuchAccount = "该用户不存在";
+        public const string WrongPassword = "密码错误";
     }
 }

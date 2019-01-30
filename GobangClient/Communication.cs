@@ -40,7 +40,7 @@ namespace GobangClient
         {
             JObject jsonToSend = JObject.FromObject(new
             {
-                Type = messageBody,
+                Type = messageType,
                 Body = messageBody
             });
 

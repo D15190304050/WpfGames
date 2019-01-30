@@ -21,14 +21,17 @@ namespace GobangServer
         static Communication()
         {
             if (!started)
+            {
+                started = true;
                 receiveBuffer = new byte[BufferSize];
+            }
         }
 
         public static void Send(Socket clientSocket, string messageType, object messageBody)
         {
             JObject jsonToSend = JObject.FromObject(new
             {
-                Type = messageBody,
+                Type = messageType,
                 Body = messageBody
             });
 

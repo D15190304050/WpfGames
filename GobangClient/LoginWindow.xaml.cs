@@ -24,6 +24,7 @@ namespace GobangClient
     /// </summary>
     public partial class LoginWindow : Window
     {
+        private const string BlankNotAllowed = "用户名和密码都不能为空";
         private AccountInfo accountToCommit;
 
         public LoginWindow()
@@ -50,7 +51,7 @@ namespace GobangClient
         private void cmdLogin_Click(object sender, RoutedEventArgs e)
         {
             if (txtAccount.Text.Length == 0 || passwordBox.Password.Length == 0)
-                txtErrorMessage.Text = "用户名和密码都不能为空";
+                txtErrorMessage.Text = BlankNotAllowed;
             else
             {
                 txtErrorMessage.Text = "";
@@ -63,12 +64,18 @@ namespace GobangClient
                 JObject responseMessage = Communication.Receive();
                 switch (responseMessage[JsonPackageKeys.Type].ToString())
                 {
-                    
+                    case JsonPackageKeys.Error:
+                        txtErrorMessage.Text = responseMessage[JsonPackageKeys.Body][JsonPackageKeys.DetailedError].ToString();
+                        break;
+                    case JsonPackageKeys.Success:
+                        Window window = new MainScene();
+                        window.Show();
+                        this.Close();
+                        break;
+                    default:
+                        MessageBox.Show("未知错误\n" + responseMessage);
+                        break;
                 }
-
-                Window window = new MainScene();
-                window.Show();
-                this.Close();
             }
         }
 
