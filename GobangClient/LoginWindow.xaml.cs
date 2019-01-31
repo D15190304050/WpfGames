@@ -72,7 +72,7 @@ namespace GobangClient
                         this.Close();
                         break;
                     default:
-                        MessageBox.Show("未知错误\n" + responseMessage);
+                        MessageBox.Show(JsonPackageKeys.UnknownError + "\n" + responseMessage);
                         break;
                 }
             }

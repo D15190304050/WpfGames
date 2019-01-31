@@ -28,5 +28,7 @@ namespace GobangServer
         public const string ModifyPassword = "ModifyPassword";
         public const string UnknownError = "未知错误";
         public const string PasswordConsistencyError = "2次输入的密码不一致";
+        public const string RequestForUserList = "RequestForUserList";
+        public const string UserList = "UserList";
     }
 }

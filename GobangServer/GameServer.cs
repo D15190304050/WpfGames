@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -18,7 +19,7 @@ namespace GobangServer
         private const int ServerPort = 8086;
 
         public static Socket ServerSocket;
-        private static LinkedList<ClientInfo> clientInfos;
+        private static ConcurrentQueue<ClientInfo> clientInfos;
 
         // Call the Report() method to signal the caller when something happen and some message should be notified to the caller.
         public static event Action<string> Report;
@@ -27,7 +28,7 @@ namespace GobangServer
 
         public static void Start()
         {
-            clientInfos = new LinkedList<ClientInfo>();
+            clientInfos = new ConcurrentQueue<ClientInfo>();
             IPAddress serverIPAddress = IPAddress.Parse(LocalhostIPAddress);
             IPEndPoint serverEndPoint = new IPEndPoint(serverIPAddress, ServerPort);
             ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -72,7 +73,7 @@ namespace GobangServer
                     State = ClientState.Idle,
                     Account = null
                 };
-                clientInfos.AddLast(client);
+                clientInfos.Enqueue(client);
 
                 clientWorker.DoWork += DoClientWork;
                 clientWorker.RunWorkerAsync(client);
@@ -120,6 +121,9 @@ namespace GobangServer
                             break;
                         case JsonPackageKeys.ModifyPassword:
                             ModifyPassword(jsonPackage[JsonPackageKeys.Body], clientSocket);
+                            break;
+                        case JsonPackageKeys.RequestForUserList:
+                            GetUserList(clientSocket);
                             break;
                     }
                 }
@@ -214,6 +218,38 @@ namespace GobangServer
             string newPassword = accountInfo[JsonPackageKeys.Password].ToString();
             SqlExecutor.ModifyPassword(account, newPassword);
             Communication.Send(clientSocket, JsonPackageKeys.Success, "");
+        }
+
+        public static void GetUserList(Socket clientSocket)
+        {
+            JArray idleUsers = new JArray();
+            JArray playingUsers = new JArray();
+
+            foreach (ClientInfo client in clientInfos)
+            {
+                if (client.State == ClientState.Idle)
+                {
+                    idleUsers.Add(JObject.FromObject(new
+                    {
+                        Account = client.Account
+                    }));
+                }
+                else
+                {
+                    playingUsers.Add(JObject.FromObject(new
+                    {
+                        Account = client.Account
+                    }));
+                }
+            }
+
+            object userList = new
+            {
+                IdleClients = idleUsers,
+                PlayingClients = playingUsers
+            };
+
+            Communication.Send(clientSocket, JsonPackageKeys.UserList, userList);
         }
     }
 }

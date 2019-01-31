@@ -61,6 +61,7 @@
     <Compile Include="AccountVerificationPage.xaml.cs">
       <DependentUpon>AccountVerificationPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ClientState.cs" />
     <Compile Include="Communication.cs" />
     <Compile Include="Encrypter.cs" />
     <Compile Include="JsonPackageKeys.cs" />
@@ -77,6 +78,9 @@
     <Compile Include="PasswordRule.cs" />
     <Compile Include="RegisterWindow.xaml.cs">
       <DependentUpon>RegisterWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SearchForGameWindow.xaml.cs">
+      <DependentUpon>SearchForGameWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="AccountVerificationPage.xaml">
       <SubType>Designer</SubType>
@@ -116,6 +120,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="RegisterWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SearchForGameWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

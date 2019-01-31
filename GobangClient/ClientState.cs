@@ -1,4 +1,4 @@
-﻿namespace GobangServer
+﻿namespace GobangClient
 {
     public enum ClientState
     {
