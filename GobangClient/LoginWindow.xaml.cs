@@ -24,7 +24,6 @@ namespace GobangClient
     /// </summary>
     public partial class LoginWindow : Window
     {
-        private const string BlankNotAllowed = "用户名和密码都不能为空";
         private AccountInfo accountToCommit;
 
         public LoginWindow()
@@ -51,7 +50,7 @@ namespace GobangClient
         private void cmdLogin_Click(object sender, RoutedEventArgs e)
         {
             if (txtAccount.Text.Length == 0 || passwordBox.Password.Length == 0)
-                txtErrorMessage.Text = BlankNotAllowed;
+                txtErrorMessage.Text = JsonPackageKeys.BlankNotAllowed;
             else
             {
                 txtErrorMessage.Text = "";
@@ -81,7 +80,7 @@ namespace GobangClient
 
         private void cmdForgetPassword_Click(object sender, RoutedEventArgs e)
         {
-
+            new ModifyPasswordWindow().ShowDialog();
         }
 
         // This method is necessary only when this window is tested in other projects.

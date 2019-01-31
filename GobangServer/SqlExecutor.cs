@@ -66,5 +66,32 @@ namespace GobangServer
 
             return password == realPassword;
         }
+
+        public static bool ValidateMailAddress(string account, string mailAddress)
+        {
+            string cmdSelectText = "SELECT MailAddress FROM Users WHERE Account = '" + account + "';";
+            SqlCommand cmdSelect = new SqlCommand(cmdSelectText, Connection);
+
+            // No try-catch-finally here, exception will be thrown to the caller of this method.
+            Connection.Open();
+            SqlDataReader reader = cmdSelect.ExecuteReader();
+            reader.Read();
+            string readMailAddress = reader[0].ToString();
+            reader.Close();
+            Connection.Close();
+
+            return mailAddress == readMailAddress;
+        }
+
+        public static void ModifyPassword(string account, string newPassword)
+        {
+            string cmdUpdateText = "UPDATE Users SET Password = '" + newPassword + "' WHERE Account = '" + account + "';";
+            SqlCommand cmdUpdate = new SqlCommand(cmdUpdateText, Connection);
+
+            // No try-catch-finally here, exception will be thrown to the caller of this method.
+            Connection.Open();
+            cmdUpdate.ExecuteNonQuery();
+            Connection.Close();
+        }
     }
 }

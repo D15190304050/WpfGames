@@ -40,3 +40,4 @@ CREATE TABLE Users
 
 -- Uncomment the following command to show data contained in the "Users" table.
 SELECT * FROM Users;
+

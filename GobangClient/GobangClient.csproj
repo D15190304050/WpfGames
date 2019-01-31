@@ -58,16 +58,30 @@
     </ApplicationDefinition>
     <Compile Include="AccountInfo.cs" />
     <Compile Include="AccountNamingRule.cs" />
+    <Compile Include="AccountVerificationPage.xaml.cs">
+      <DependentUpon>AccountVerificationPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Communication.cs" />
     <Compile Include="Encrypter.cs" />
     <Compile Include="JsonPackageKeys.cs" />
     <Compile Include="MailAddressValidationRule.cs" />
+    <Compile Include="ModifyPasswordWindow.xaml.cs">
+      <DependentUpon>ModifyPasswordWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="NewPasswordPage.xaml.cs">
+      <DependentUpon>NewPasswordPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="NoBlankRule.cs" />
     <Compile Include="PasswordBoxHelper.cs" />
+    <Compile Include="PasswordInfo.cs" />
     <Compile Include="PasswordRule.cs" />
     <Compile Include="RegisterWindow.xaml.cs">
       <DependentUpon>RegisterWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="AccountVerificationPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="component\Theme\GobangClientGlobalStyles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -93,6 +107,14 @@
       <DependentUpon>LoginWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ModifyPasswordWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="NewPasswordPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="RegisterWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

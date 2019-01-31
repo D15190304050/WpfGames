@@ -115,6 +115,12 @@ namespace GobangServer
                         case JsonPackageKeys.Login:
                             Login(jsonPackage[JsonPackageKeys.Body], clientSocket);
                             break;
+                        case JsonPackageKeys.ValidateAccount:
+                            ValidateMailAddress(jsonPackage[JsonPackageKeys.Body], clientSocket);
+                            break;
+                        case JsonPackageKeys.ModifyPassword:
+                            ModifyPassword(jsonPackage[JsonPackageKeys.Body], clientSocket);
+                            break;
                     }
                 }
             }
@@ -171,6 +177,43 @@ namespace GobangServer
                 else
                     Communication.Send(clientSocket, JsonPackageKeys.Success, "");
             }
+        }
+
+        private static void ValidateMailAddress(JToken accountInfo, Socket clientSocket)
+        {
+            string account = accountInfo[JsonPackageKeys.Account].ToString();
+
+            if (!SqlExecutor.Exists(account))
+            {
+                object errorMessage = new
+                {
+                    DetailedError = JsonPackageKeys.NoSuchAccount
+                };
+                Communication.Send(clientSocket, JsonPackageKeys.Error, errorMessage);
+            }
+            else
+            {
+                string mailAddress = accountInfo[JsonPackageKeys.MailAddress].ToString();
+
+                if (!SqlExecutor.ValidateMailAddress(account, mailAddress))
+                {
+                    object errorMessage = new
+                    {
+                        DetailedError = JsonPackageKeys.WrongMailAddress
+                    };
+                    Communication.Send(clientSocket, JsonPackageKeys.Error, errorMessage);
+                }
+                else
+                    Communication.Send(clientSocket, JsonPackageKeys.Success, "");
+            }
+        }
+
+        public static void ModifyPassword(JToken accountInfo, Socket clientSocket)
+        {
+            string account = accountInfo[JsonPackageKeys.Account].ToString();
+            string newPassword = accountInfo[JsonPackageKeys.Password].ToString();
+            SqlExecutor.ModifyPassword(account, newPassword);
+            Communication.Send(clientSocket, JsonPackageKeys.Success, "");
         }
     }
 }
