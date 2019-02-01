@@ -14,7 +14,7 @@ namespace GobangClient
     public static class Communication
     {
         private const int BufferSize = 1024;
-        private const string ServerIPAddress = "223.2.16.234";
+        private const string ServerIPAddress = "127.0.0.1";
         private const int ServerPort = 8086;
 
         private static Socket ClientSocket { get; set; }

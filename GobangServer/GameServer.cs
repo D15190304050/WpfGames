@@ -15,7 +15,7 @@ namespace GobangServer
 {
     public static class GameServer
     {
-        public const string LocalhostIPAddress = "223.2.16.234";
+        public const string LocalhostIPAddress = "127.0.0.1";
         private const int ServerPort = 8086;
 
         public static Socket ServerSocket;
@@ -66,17 +66,8 @@ namespace GobangServer
                     WorkerSupportsCancellation = true
                 };
 
-                ClientInfo client = new ClientInfo
-                {
-                    ClientSocket = clientSocket,
-                    Worker = clientWorker,
-                    State = ClientState.Idle,
-                    Account = null
-                };
-                clientInfos.Enqueue(client);
-
                 clientWorker.DoWork += DoClientWork;
-                clientWorker.RunWorkerAsync(client);
+                clientWorker.RunWorkerAsync(clientSocket);
             }
         }
 
@@ -93,9 +84,8 @@ namespace GobangServer
 
         private static void DoClientWork(object sender, DoWorkEventArgs e)
         {
-            if (e.Argument is ClientInfo clientInfo)
+            if (e.Argument is Socket clientSocket)
             {
-                Socket clientSocket = clientInfo.ClientSocket;
                 byte[] receiveBuffer = new byte[1024];
 
                 for (; ; )
@@ -114,7 +104,7 @@ namespace GobangServer
                             Register(jsonPackage[JsonPackageKeys.Body], clientSocket);
                             break;
                         case JsonPackageKeys.Login:
-                            Login(jsonPackage[JsonPackageKeys.Body], clientSocket);
+                            Login(jsonPackage[JsonPackageKeys.Body], clientSocket, sender as BackgroundWorker);
                             break;
                         case JsonPackageKeys.ValidateAccount:
                             ValidateMailAddress(jsonPackage[JsonPackageKeys.Body], clientSocket);
@@ -154,7 +144,7 @@ namespace GobangServer
             }
         }
 
-        private static void Login(JToken accountInfo, Socket clientSocket)
+        private static void Login(JToken accountInfo, Socket clientSocket, BackgroundWorker worker)
         {
             string account = accountInfo[JsonPackageKeys.Account].ToString();
 
@@ -179,7 +169,19 @@ namespace GobangServer
                     Communication.Send(clientSocket, JsonPackageKeys.Error, errorMessage);
                 }
                 else
+                {
+                    // Add the new online user to online user list.
+                    ClientInfo client = new ClientInfo
+                    {
+                        Account = account,
+                        ClientSocket = clientSocket,
+                        State = ClientState.Idle,
+                        Worker = worker
+                    };
+                    clientInfos.Enqueue(client);
+
                     Communication.Send(clientSocket, JsonPackageKeys.Success, "");
+                }
             }
         }
 
@@ -225,6 +227,7 @@ namespace GobangServer
             JArray idleUsers = new JArray();
             JArray playingUsers = new JArray();
 
+            ClientInfo[] clientInformation = clientInfos.ToArray();
             foreach (ClientInfo client in clientInfos)
             {
                 if (client.State == ClientState.Idle)
@@ -243,10 +246,13 @@ namespace GobangServer
                 }
             }
 
+            // Send the count of 2 kind of users so that the client can avoid index out of boundary exception.
             object userList = new
             {
-                IdleClients = idleUsers,
-                PlayingClients = playingUsers
+                IdleUserCount = idleUsers.Count,
+                PlayingUserCount = playingUsers.Count,
+                IdleUsers = idleUsers,
+                PlayingUsers = playingUsers
             };
 
             Communication.Send(clientSocket, JsonPackageKeys.UserList, userList);

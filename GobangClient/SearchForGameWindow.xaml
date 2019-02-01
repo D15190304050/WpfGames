@@ -38,6 +38,6 @@
         <ListBox Grid.Row="2" Name="lstIdleUsers" Background="CadetBlue" MouseDoubleClick="lstIdleUsers_MouseDoubleClick" />
 
         <TextBlock Grid.Row="3" Background="Coral">游戏中</TextBlock>
-        <ListBox Grid.Row="4" Name="lstPlayingUsers" Background="Coral" MouseDoubleClick="lstPlayingUsers_MouseDoubleClick" />
+        <ListBox Grid.Row="4" Name="lstPlayingUsers" Background="Coral" />
     </Grid>
 </Window>

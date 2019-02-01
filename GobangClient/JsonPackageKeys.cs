@@ -30,5 +30,9 @@ namespace GobangClient
         public const string PasswordConsistencyError = "2次输入的密码不一致";
         public const string RequestForUserList = "RequestForUserList";
         public const string UserList = "UserList";
+        public const string IdleUserCount = "IdleUserCount";
+        public const string PlayingUserCount = "PlayingUserCount";
+        public const string IdleUsers = "IdleUsers";
+        public const string PlayingUsers = "PlayingUsers";
     }
 }
