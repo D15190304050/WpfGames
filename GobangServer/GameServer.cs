@@ -86,13 +86,9 @@ namespace GobangServer
         {
             if (e.Argument is Socket clientSocket)
             {
-                byte[] receiveBuffer = new byte[1024];
-
                 for (; ; )
                 {
-                    int receivedLength = clientSocket.Receive(receiveBuffer);
-                    string jsonText = Encoding.UTF8.GetString(receiveBuffer, 0, receivedLength);
-                    JObject jsonPackage = JObject.Parse(jsonText);
+                    JObject jsonPackage = Communication.Receive(clientSocket);
 
                     // If Report event is raised here, the whole server program will be blocked.
                     // I don't know why this happened and I will fix this.
@@ -114,6 +110,12 @@ namespace GobangServer
                             break;
                         case JsonPackageKeys.RequestForUserList:
                             GetUserList(clientSocket);
+                            break;
+                        case JsonPackageKeys.RequestForMatch:
+                            ForwardMatchRequest(jsonPackage, clientSocket);
+                            break;
+                        case JsonPackageKeys.AcceptMatch:
+                            ForwardMatchAcceptance(jsonPackage[JsonPackageKeys.Body]);
                             break;
                     }
                 }
@@ -214,7 +216,7 @@ namespace GobangServer
             }
         }
 
-        public static void ModifyPassword(JToken accountInfo, Socket clientSocket)
+        private static void ModifyPassword(JToken accountInfo, Socket clientSocket)
         {
             string account = accountInfo[JsonPackageKeys.Account].ToString();
             string newPassword = accountInfo[JsonPackageKeys.Password].ToString();
@@ -222,7 +224,7 @@ namespace GobangServer
             Communication.Send(clientSocket, JsonPackageKeys.Success, "");
         }
 
-        public static void GetUserList(Socket clientSocket)
+        private static void GetUserList(Socket clientSocket)
         {
             JArray idleUsers = new JArray();
             JArray playingUsers = new JArray();
@@ -256,6 +258,38 @@ namespace GobangServer
             };
 
             Communication.Send(clientSocket, JsonPackageKeys.UserList, userList);
+        }
+
+        private static void ForwardMatchRequest(JToken requestInfo, Socket initiatorSocket)
+        {
+            ClientInfo opponent = FindClientByAccount(requestInfo[JsonPackageKeys.Body][JsonPackageKeys.OpponentAccount].ToString());
+
+            // Actually, opponent can never be null.
+            if ((opponent != null) && (opponent.State == ClientState.Idle))
+                Communication.Send(opponent.ClientSocket, JsonPackageKeys.RequestForMatch, requestInfo[JsonPackageKeys.Body]);
+            else
+                Communication.Send(initiatorSocket, JsonPackageKeys.OpponentNotAvailable, "");
+        }
+
+        private static ClientInfo FindClientByAccount(string account)
+        {
+            foreach (ClientInfo client in clientInfos)
+            {
+                if (client.Account == account)
+                    return client;
+            }
+
+            return null;
+        }
+
+        private static void ForwardMatchAcceptance(JToken responseMessage)
+        {
+            string initiatorAccount = responseMessage[JsonPackageKeys.InitiatorAccount].ToString();
+            ClientInfo initiator = FindClientByAccount(initiatorAccount);
+
+            // Actually, opponent can never be null.
+            if (initiator != null)
+                Communication.Send(initiator.ClientSocket, JsonPackageKeys.AcceptMatch, responseMessage);
         }
     }
 }

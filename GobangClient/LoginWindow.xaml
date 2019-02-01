@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:GobangClient"
         mc:Ignorable="d"
         Title="用户登录" Height="330" Width="450"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        Closed="Window_Closed">
 
     <Window.Resources>
         <Style TargetType="Control" x:Key="InputControlStyle">

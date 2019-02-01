@@ -24,6 +24,8 @@ namespace GobangClient
     public partial class SearchForGameWindow : Window
     {
         private string localAccount;
+        private BackgroundWorker matchListener;
+        private Timer requestForUserListsTimer;
 
         public SearchForGameWindow(string localAccount)
         {
@@ -35,61 +37,136 @@ namespace GobangClient
         {
             if (lstIdleUsers.SelectedItem is string opponentAccount)
             {
-                MessageBox.Show("对手: " + opponentAccount);
+                RequestForMatch(opponentAccount);
+                MessageBox.Show("请求已发送");
             }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            BackgroundWorker worker = new BackgroundWorker
+            requestForUserListsTimer = new Timer(RequestUserLists, null, 0, 2000);
+
+            matchListener = new BackgroundWorker
             {
                 WorkerReportsProgress = true,
                 WorkerSupportsCancellation = true,
             };
 
-            worker.DoWork += RequestUserLists;
-            worker.RunWorkerAsync();
+            matchListener.DoWork += ListenMatch;
+            matchListener.RunWorkerAsync();
         }
 
-        private void RequestUserLists(object sender, DoWorkEventArgs e)
+        // Refresh the idle user list and the playing user list every 2 seconds.
+        // Use a method to encapsulate this function to enhance readability.
+        private void RequestUserLists(object state)
+        {
+            Communication.Send(JsonPackageKeys.RequestForUserList, "");
+        }
+
+        // Terminate the matchListener.
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            matchListener.CancelAsync();
+            requestForUserListsTimer.Dispose();
+        }
+
+        private void RequestForMatch(string opponentAccount)
+        {
+            object matchRequest = new
+            {
+                InitiatorAccount = localAccount,
+                OpponentAccount = opponentAccount
+            };
+            Communication.Send(JsonPackageKeys.RequestForMatch, matchRequest);
+        }
+
+        private void ListenMatch(object sender, DoWorkEventArgs e)
         {
             for (;;)
             {
-                // Clear all existing user information.
-                this.Dispatcher.Invoke(() => lstIdleUsers.Items.Clear());
-                this.Dispatcher.Invoke(() => lstPlayingUsers.Items.Clear());
-
-                Communication.Send(JsonPackageKeys.RequestForUserList, "");
-                JToken userList = Communication.Receive()[JsonPackageKeys.Body];
-
-                int idleUserCount = int.Parse(userList[JsonPackageKeys.IdleUserCount].ToString());
-                int playingUserCount = int.Parse(userList[JsonPackageKeys.PlayingUserCount].ToString());
-                JToken idleUsers = userList[JsonPackageKeys.IdleUsers];
-                JToken playingUsers = userList[JsonPackageKeys.PlayingUsers];
-
-                for (int i = 0; i < idleUserCount; i++)
+                JObject responseMessage = Communication.Receive();
+                switch (responseMessage[JsonPackageKeys.Type].ToString())
                 {
-                    string account = idleUsers[i][JsonPackageKeys.Account].ToString();
-
-                    if (string.IsNullOrEmpty(account))
-                        continue;
-
-                    if (account != localAccount)
-                        this.Dispatcher.Invoke(() => lstIdleUsers.Items.Add(account));
+                    case JsonPackageKeys.OpponentNotAvailable:
+                        MessageBox.Show(JsonPackageKeys.OpponentNotAvailable);
+                        break;
+                    case JsonPackageKeys.RequestForMatch:
+                        ResponseMatchRequest(responseMessage[JsonPackageKeys.Body][JsonPackageKeys.InitiatorAccount].ToString());
+                        break;
+                    case JsonPackageKeys.AcceptMatch:
+                        StartGame();
+                        break;
+                    case JsonPackageKeys.UserList:
+                        RefreshUserLists(responseMessage[JsonPackageKeys.Body]);
+                        break;
+                    default:
+                        MessageBox.Show(JsonPackageKeys.UnknownError + "\n" + responseMessage);
+                        break;
                 }
-
-                for (int i = 0; i < playingUserCount; i++)
-                {
-                    string account = playingUsers[i].ToString();
-                    this.Dispatcher.Invoke(() => lstIdleUsers.Items.Add(account));
-                }
-
-                this.Dispatcher.Invoke(() => lstIdleUsers.Items.Refresh());
-                this.Dispatcher.Invoke(() => lstPlayingUsers.Items.Refresh());
-
-                // Sleep for 2000 millis, which makes the request not so frequent.
-                Thread.Sleep(2000);
             }
+        }
+
+        private void RefreshUserLists(JToken userList)
+        {
+            // Clear all existing user information.
+            this.Dispatcher.Invoke(() => lstIdleUsers.Items.Clear());
+            this.Dispatcher.Invoke(() => lstPlayingUsers.Items.Clear());
+
+            int idleUserCount = int.Parse(userList[JsonPackageKeys.IdleUserCount].ToString());
+            int playingUserCount = int.Parse(userList[JsonPackageKeys.PlayingUserCount].ToString());
+            JToken idleUsers = userList[JsonPackageKeys.IdleUsers];
+            JToken playingUsers = userList[JsonPackageKeys.PlayingUsers];
+
+            for (int i = 0; i < idleUserCount; i++)
+            {
+                string account = idleUsers[i][JsonPackageKeys.Account].ToString();
+
+                if (string.IsNullOrEmpty(account))
+                    continue;
+
+                if (account != localAccount)
+                    this.Dispatcher.Invoke(() => lstIdleUsers.Items.Add(account));
+            }
+
+            for (int i = 0; i < playingUserCount; i++)
+            {
+                string account = playingUsers[i].ToString();
+                this.Dispatcher.Invoke(() => lstIdleUsers.Items.Add(account));
+            }
+
+            this.Dispatcher.Invoke(() => lstIdleUsers.Items.Refresh());
+            this.Dispatcher.Invoke(() => lstPlayingUsers.Items.Refresh());
+        }
+
+        private bool AcceptMatch(string initiatorAccount)
+        {
+            MessageBoxResult result = MessageBox.Show("用户 " + initiatorAccount + " 向您发出了比赛请求，是否接受？", "比赛请求", MessageBoxButton.YesNo);
+            return result == MessageBoxResult.Yes;
+        }
+
+        private void ResponseMatchRequest(string initiatorAccount)
+        {
+            // If accept the match request, send the acceptance response, close this window and show the match window.
+            // Else, send the rejection response.
+            if (AcceptMatch(initiatorAccount))
+            {
+                object matchAcceptance = new
+                {
+                    InitiatorAccount = initiatorAccount,
+                    OpponentAccount = localAccount
+                };
+                Communication.Send(JsonPackageKeys.AcceptMatch, matchAcceptance);
+                StartGame();
+            }
+            else
+                Communication.Send(JsonPackageKeys.RejectMatch, "");
+        }
+
+        // Start game.
+        private void StartGame()
+        {
+            this.Dispatcher.Invoke(() => new MainScene().Show());
+            this.Dispatcher.Invoke(this.Close);
         }
     }
 }

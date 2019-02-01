@@ -34,5 +34,11 @@ namespace GobangServer
         public const string PlayingUserCount = "PlayingUserCount";
         public const string IdleUsers = "IdleUsers";
         public const string PlayingUsers = "PlayingUsers";
+        public const string RequestForMatch = "RequestForMatch";
+        public const string InitiatorAccount = "InitiatorAccount";
+        public const string OpponentAccount = "OpponentAccount";
+        public const string OpponentNotAvailable = "该用户正在游戏中";
+        public const string AcceptMatch = "AcceptMatch";
+        public const string RejectMatch = "RejectMatch";
     }
 }
