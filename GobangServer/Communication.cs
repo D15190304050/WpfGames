@@ -35,8 +35,6 @@ namespace GobangServer
                 Body = messageBody
             });
 
-            int x = jsonToSend.ToString() == "{}" ? 1 : 0;
-
             byte[] jsonBytes = Encoding.UTF8.GetBytes(jsonToSend.ToString());
             clientSocket.Send(jsonBytes);
         }

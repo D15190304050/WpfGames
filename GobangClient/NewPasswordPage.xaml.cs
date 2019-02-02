@@ -56,7 +56,7 @@ namespace GobangClient
                 account.Password = Encrypter.Encrypt(password.NewPassword);
                 Communication.Send(JsonPackageKeys.ModifyPassword, account);
 
-                return Communication.Receive();
+                return Communication.Receive()[0];
             }
 
             return JObject.FromObject(new

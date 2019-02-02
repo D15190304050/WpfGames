@@ -41,7 +41,7 @@ namespace GobangClient
 
         private void cmdNext_Click(object sender, RoutedEventArgs e)
         {
-            JObject responseMessage = accountVerificationPage.ValidateMailAddress();
+            JObject responseMessage = accountVerificationPage.ValidateMailAddress()[0];
             switch (responseMessage[JsonPackageKeys.Type].ToString())
             {
                 case JsonPackageKeys.Success:

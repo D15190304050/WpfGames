@@ -84,24 +84,33 @@ namespace GobangClient
         {
             for (;;)
             {
-                JObject responseMessage = Communication.Receive();
-                switch (responseMessage[JsonPackageKeys.Type].ToString())
+                JObject[] responseMessages = Communication.Receive();
+                for (int i = 0; i < responseMessages.Length; i++)
                 {
-                    case JsonPackageKeys.OpponentNotAvailable:
-                        MessageBox.Show(JsonPackageKeys.OpponentNotAvailable);
-                        break;
-                    case JsonPackageKeys.RequestForMatch:
-                        ResponseMatchRequest(responseMessage[JsonPackageKeys.Body][JsonPackageKeys.InitiatorAccount].ToString());
-                        break;
-                    case JsonPackageKeys.AcceptMatch:
-                        StartGame();
-                        break;
-                    case JsonPackageKeys.UserList:
-                        RefreshUserLists(responseMessage[JsonPackageKeys.Body]);
-                        break;
-                    default:
-                        MessageBox.Show(JsonPackageKeys.UnknownError + "\n" + responseMessage);
-                        break;
+                    JObject responseMessage = responseMessages[i];
+                    switch (responseMessage[JsonPackageKeys.Type].ToString())
+                    {
+                        case JsonPackageKeys.OpponentNotAvailable:
+                            MessageBox.Show(JsonPackageKeys.OpponentNotAvailable);
+                            break;
+                        case JsonPackageKeys.RequestForMatch:
+                            ResponseMatchRequest(responseMessage[JsonPackageKeys.Body][JsonPackageKeys.InitiatorAccount]
+                                .ToString());
+                            break;
+                        case JsonPackageKeys.AcceptMatch:
+                            MessageBox.Show("对方接受了您的比赛请求");
+                            StartMatch();
+                            break;
+                        case JsonPackageKeys.UserList:
+                            RefreshUserLists(responseMessage[JsonPackageKeys.Body]);
+                            break;
+                        case JsonPackageKeys.RejectMatch:
+                            MessageBox.Show("对方拒绝了您的比赛请求");
+                            break;
+                        default:
+                            MessageBox.Show(JsonPackageKeys.UnknownError + "\n" + responseMessage);
+                            break;
+                    }
                 }
             }
         }
@@ -146,24 +155,25 @@ namespace GobangClient
 
         private void ResponseMatchRequest(string initiatorAccount)
         {
+            object matchInfo = new
+            {
+                InitiatorAccount = initiatorAccount,
+                OpponentAccount = localAccount
+            };
+
             // If accept the match request, send the acceptance response, close this window and show the match window.
             // Else, send the rejection response.
             if (AcceptMatch(initiatorAccount))
             {
-                object matchAcceptance = new
-                {
-                    InitiatorAccount = initiatorAccount,
-                    OpponentAccount = localAccount
-                };
-                Communication.Send(JsonPackageKeys.AcceptMatch, matchAcceptance);
-                StartGame();
+                Communication.Send(JsonPackageKeys.AcceptMatch, matchInfo);
+                StartMatch();
             }
             else
-                Communication.Send(JsonPackageKeys.RejectMatch, "");
+                Communication.Send(JsonPackageKeys.RejectMatch, matchInfo);
         }
 
         // Start game.
-        private void StartGame()
+        private void StartMatch()
         {
             this.Dispatcher.Invoke(() => new MainScene().Show());
             this.Dispatcher.Invoke(this.Close);

@@ -117,6 +117,9 @@ namespace GobangServer
                         case JsonPackageKeys.AcceptMatch:
                             ForwardMatchAcceptance(jsonPackage[JsonPackageKeys.Body]);
                             break;
+                        case JsonPackageKeys.RejectMatch:
+                            RejectMatch(jsonPackage[JsonPackageKeys.Body]);
+                            break;
                     }
                 }
             }
@@ -290,6 +293,16 @@ namespace GobangServer
             // Actually, opponent can never be null.
             if (initiator != null)
                 Communication.Send(initiator.ClientSocket, JsonPackageKeys.AcceptMatch, responseMessage);
+        }
+
+        private static void RejectMatch(JToken matchInfo)
+        {
+            string initiatorAccount = matchInfo[JsonPackageKeys.InitiatorAccount].ToString();
+            ClientInfo initiator = FindClientByAccount(initiatorAccount);
+
+            // Actually, opponent can never be null.
+            if (initiator != null)
+                Communication.Send(initiator.ClientSocket, JsonPackageKeys.RejectMatch, "");
         }
     }
 }

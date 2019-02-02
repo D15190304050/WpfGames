@@ -16,6 +16,8 @@ using System.Reflection;
 using System.Threading;
 using GobangClient;
 using System.IO;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace ClientServerJointTest
 {
@@ -24,8 +26,11 @@ namespace ClientServerJointTest
     /// </summary>
     public partial class MainWindow : Window
     {
+        private ConcurrentQueue<Process> clientProcesses;
+
         public MainWindow()
         {
+            clientProcesses = new ConcurrentQueue<Process>();
             InitializeComponent();
         }
 
@@ -44,12 +49,18 @@ namespace ClientServerJointTest
         {
             GobangServerWindow serverWindow = new GobangServerWindow();
             serverWindow.Show();
+
+            //MessageBox.Show(Directory.GetCurrentDirectory());
+            //Process serverProcess = Process.Start(Directory.GetCurrentDirectory() + "/GobangServer.exe");
         }
 
         private void cmdStartGobangClient_Click(object sender, RoutedEventArgs e)
         {
-            LoginWindow loginWindow = new LoginWindow();
-            loginWindow.Show();
+            //LoginWindow loginWindow = new LoginWindow();
+            //loginWindow.Show();
+
+            // There will be something wrong if the window is just created and shown in this process, but it will be totally OK if open the window using another process.
+            Process clientProcess = Process.Start(Directory.GetCurrentDirectory() + "/GobangClient.exe");
         }
     }
 }
