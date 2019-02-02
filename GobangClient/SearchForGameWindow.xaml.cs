@@ -84,7 +84,7 @@ namespace GobangClient
         {
             for (;;)
             {
-                JObject[] responseMessages = Communication.Receive();
+                JObject[] responseMessages = Communication.ReceiveMessages();
                 for (int i = 0; i < responseMessages.Length; i++)
                 {
                     JObject responseMessage = responseMessages[i];

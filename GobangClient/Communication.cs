@@ -52,7 +52,7 @@ namespace GobangClient
 
         // Receive the response message encapsulated in JSON objects.
         // Note that since this is a multi-thread based game, and quite a few of them will send messages to the server, it's obviously that the Communication class may receive several response message at a time.
-        public static JObject[] Receive()
+        public static JObject[] ReceiveMessages()
         {
             int receivedLength = ClientSocket.Receive(receiveBuffer);
             string responseText = Encoding.UTF8.GetString(receiveBuffer, 0, receivedLength);
@@ -70,6 +70,15 @@ namespace GobangClient
                 responseMessages[i] = JObject.Parse(responseJsons[i]);
 
             return responseMessages;
+        }
+
+        public static JObject ReceiveMessage()
+        {
+            int receivedLength = ClientSocket.Receive(receiveBuffer);
+            string responseText = Encoding.UTF8.GetString(receiveBuffer, 0, receivedLength);
+            JObject responseMessage = JObject.Parse(responseText);
+
+            return responseMessage;
         }
 
         public static void Close()

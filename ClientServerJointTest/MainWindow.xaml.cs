@@ -61,6 +61,13 @@ namespace ClientServerJointTest
 
             // There will be something wrong if the window is just created and shown in this process, but it will be totally OK if open the window using another process.
             Process clientProcess = Process.Start(Directory.GetCurrentDirectory() + "/GobangClient.exe");
+            clientProcesses.Enqueue(clientProcess);
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            foreach (Process process in clientProcesses)
+                process.Kill();
         }
     }
 }

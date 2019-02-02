@@ -27,12 +27,11 @@ namespace GobangClient
             InitializeComponent();
         }
 
-        public JObject[] ValidateMailAddress()
+        public JObject ValidateMailAddress()
         {
             if (txtAccount.Text.Length == 0 || txtMailAddress.Text.Length == 0)
             {
-                JObject[] validationResponse = new JObject[1];
-                validationResponse[1] = JObject.FromObject(new
+                return JObject.FromObject(new
                 {
                     Type = JsonPackageKeys.Error,
                     Body = new
@@ -40,7 +39,6 @@ namespace GobangClient
                         DetailedError = JsonPackageKeys.BlankNotAllowed
                     }
                 });
-                return validationResponse;
             }
 
             object messageBody = new
@@ -50,7 +48,7 @@ namespace GobangClient
             };
             Communication.Send(JsonPackageKeys.ValidateAccount, messageBody);
 
-            return Communication.Receive();
+            return Communication.ReceiveMessage();
         }
     }
 }

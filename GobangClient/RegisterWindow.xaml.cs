@@ -56,7 +56,7 @@ namespace GobangClient
                 accountToCommit.MailAddress = registerAccountInfo.MailAddress;
                 Communication.Send(JsonPackageKeys.Register, accountToCommit);
 
-                JObject responseMessage = Communication.Receive()[0];
+                JObject responseMessage = Communication.ReceiveMessage();
                 switch (responseMessage[JsonPackageKeys.Type].ToString())
                 {
                     // Display error message if an error occured.

@@ -60,26 +60,22 @@ namespace GobangClient
                 accountToCommit.Password = Encrypter.Encrypt(passwordBox.Password);
                 accountToCommit.MailAddress = "";
                 Communication.Send(JsonPackageKeys.Login, accountToCommit);
-                
-                JObject[] responseMessages = Communication.Receive();
-                for (int i = 0; i < responseMessages.Length; i++)
+
+                JObject responseMessage = Communication.ReceiveMessage();
+                switch (responseMessage[JsonPackageKeys.Type].ToString())
                 {
-                    JObject responseMessage = responseMessages[i];
-                    switch (responseMessage[JsonPackageKeys.Type].ToString())
-                    {
-                        case JsonPackageKeys.Error:
-                            txtErrorMessage.Text = responseMessage[JsonPackageKeys.Body][JsonPackageKeys.DetailedError].ToString();
-                            break;
-                        case JsonPackageKeys.Success:
-                            // Use Show() method so that the windows will not be blocked in the join test.
-                            // In the standalone release part, the ShowDialog() method should be used.
-                            new SearchForGameWindow(accountToCommit.Account).Show();
-                            this.Close();
-                            break;
-                        default:
-                            MessageBox.Show(JsonPackageKeys.UnknownError + "\n" + responseMessage);
-                            break;
-                    }
+                    case JsonPackageKeys.Error:
+                        txtErrorMessage.Text = responseMessage[JsonPackageKeys.Body][JsonPackageKeys.DetailedError].ToString();
+                        break;
+                    case JsonPackageKeys.Success:
+                        // Use Show() method so that the windows will not be blocked in the join test.
+                        // In the standalone release part, the ShowDialog() method should be used.
+                        new SearchForGameWindow(accountToCommit.Account).Show();
+                        this.Close();
+                        break;
+                    default:
+                        MessageBox.Show(JsonPackageKeys.UnknownError + "\n" + responseMessage);
+                        break;
                 }
             }
         }

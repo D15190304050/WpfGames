@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientServerJointTest"
         mc:Ignorable="d"
-        Title="LoginWindow" Height="450" Width="300">
+        Title="LoginWindow" Height="450" Width="300"
+        Closed="Window_Closed">
 
     <Window.Resources>
         <Style TargetType="Button">
