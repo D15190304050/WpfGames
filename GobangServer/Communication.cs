@@ -41,11 +41,18 @@ namespace GobangServer
 
         public static JObject Receive(Socket clientSocket)
         {
-            int receivedLength = clientSocket.Receive(receiveBuffer);
-            string responseText = Encoding.UTF8.GetString(receiveBuffer, 0, receivedLength);
-            JObject responseMessage = JObject.Parse(responseText);
+            try
+            {
+                int receivedLength = clientSocket.Receive(receiveBuffer);
+                string responseText = Encoding.UTF8.GetString(receiveBuffer, 0, receivedLength);
+                JObject responseMessage = JObject.Parse(responseText);
 
-            return responseMessage;
+                return responseMessage;
+            }
+            catch (SocketException)
+            {
+                return null;
+            }
         }
     }
 }

@@ -21,6 +21,11 @@ namespace GobangServer
         public static Socket ServerSocket;
         private static ConcurrentQueue<ClientInfo> clientInfos;
 
+        // Theoretically, this member is only used in the UserGoOffline() method, so it should be a variable in the method.
+        // But for the performance measure, I put it here as a class member.
+        // So that this object will only be created once instead of being created again whenever the UserGoOffline() method is called.
+        private static LinkedList<ClientInfo> clientInfosBackup;
+
         // Call the Report() method to signal the caller when something happen and some message should be notified to the caller.
         public static event Action<string> Report;
 
@@ -29,6 +34,7 @@ namespace GobangServer
         public static void Start()
         {
             clientInfos = new ConcurrentQueue<ClientInfo>();
+            clientInfosBackup = new LinkedList<ClientInfo>();
             IPAddress serverIPAddress = IPAddress.Parse(LocalhostIPAddress);
             IPEndPoint serverEndPoint = new IPEndPoint(serverIPAddress, ServerPort);
             ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -88,38 +94,47 @@ namespace GobangServer
             {
                 for (; ; )
                 {
+                    // If the client close the socket, the Receive() method here returns null, indicating that this BackgroundWorker should be stopped.
                     JObject jsonPackage = Communication.Receive(clientSocket);
 
-                    // If Report event is raised here, the whole server program will be blocked.
-                    // I don't know why this happened and I will fix this.
-                    //Report?.Invoke(jsonPackage[JsonPackageKeys.Type].ToString());
-
-                    switch (jsonPackage[JsonPackageKeys.Type].ToString())
+                    if (jsonPackage == null)
                     {
-                        case JsonPackageKeys.Register:
-                            Register(jsonPackage[JsonPackageKeys.Body], clientSocket);
-                            break;
-                        case JsonPackageKeys.Login:
-                            Login(jsonPackage[JsonPackageKeys.Body], clientSocket, sender as BackgroundWorker);
-                            break;
-                        case JsonPackageKeys.ValidateAccount:
-                            ValidateMailAddress(jsonPackage[JsonPackageKeys.Body], clientSocket);
-                            break;
-                        case JsonPackageKeys.ModifyPassword:
-                            ModifyPassword(jsonPackage[JsonPackageKeys.Body], clientSocket);
-                            break;
-                        case JsonPackageKeys.RequestForUserList:
-                            GetUserList(clientSocket);
-                            break;
-                        case JsonPackageKeys.RequestForMatch:
-                            ForwardMatchRequest(jsonPackage, clientSocket);
-                            break;
-                        case JsonPackageKeys.AcceptMatch:
-                            ForwardMatchAcceptance(jsonPackage[JsonPackageKeys.Body]);
-                            break;
-                        case JsonPackageKeys.RejectMatch:
-                            RejectMatch(jsonPackage[JsonPackageKeys.Body]);
-                            break;
+                        UserGoOffline(clientSocket);
+                        e.Cancel = true;
+                    }
+                    else
+                    {
+                        // If Report event is raised here, the whole server program will be blocked.
+                        // I don't know why this happened and I will fix this.
+                        //Report?.Invoke(jsonPackage[JsonPackageKeys.Type].ToString());
+
+                        switch (jsonPackage[JsonPackageKeys.Type].ToString())
+                        {
+                            case JsonPackageKeys.Register:
+                                Register(jsonPackage[JsonPackageKeys.Body], clientSocket);
+                                break;
+                            case JsonPackageKeys.Login:
+                                Login(jsonPackage[JsonPackageKeys.Body], clientSocket, sender as BackgroundWorker);
+                                break;
+                            case JsonPackageKeys.ValidateAccount:
+                                ValidateMailAddress(jsonPackage[JsonPackageKeys.Body], clientSocket);
+                                break;
+                            case JsonPackageKeys.ModifyPassword:
+                                ModifyPassword(jsonPackage[JsonPackageKeys.Body], clientSocket);
+                                break;
+                            case JsonPackageKeys.RequestForUserList:
+                                GetUserList(clientSocket);
+                                break;
+                            case JsonPackageKeys.RequestForMatch:
+                                ForwardMatchRequest(jsonPackage, clientSocket);
+                                break;
+                            case JsonPackageKeys.AcceptMatch:
+                                ForwardMatchAcceptance(jsonPackage[JsonPackageKeys.Body]);
+                                break;
+                            case JsonPackageKeys.RejectMatch:
+                                RejectMatch(jsonPackage[JsonPackageKeys.Body]);
+                                break;
+                        }
                     }
                 }
             }
@@ -303,6 +318,43 @@ namespace GobangServer
             // Actually, opponent can never be null.
             if (initiator != null)
                 Communication.Send(initiator.ClientSocket, JsonPackageKeys.RejectMatch, "");
+        }
+
+        private static void UserGoOffline(Socket clientSocket)
+        {
+            ClientInfo clientToGoOffline = null;
+            foreach (ClientInfo client in clientInfos)
+            {
+                if (client.ClientSocket == clientSocket)
+                {
+                    clientToGoOffline = client;
+                    break;
+                }
+            }
+
+            if (clientToGoOffline != null)
+            {
+                // Use "lock" keyword to make sure the thread safety.
+                lock (clientInfos)
+                {
+                    // Copy to clientInfoBackup.
+                    // Note that the user who goes offline is not copied.
+                    clientInfosBackup.Clear();
+                    foreach (ClientInfo client in clientInfos)
+                    {
+                        if (client != clientToGoOffline)
+                            clientInfosBackup.AddLast(client);
+                    }
+
+                    // Clear the original queue.
+                    while (clientInfos.Count != 0)
+                        clientInfos.TryDequeue(out ClientInfo r);
+
+                    // Copy back.
+                    foreach (ClientInfo client in clientInfosBackup)
+                        clientInfos.Enqueue(client);
+                }
+            }
         }
     }
 }
