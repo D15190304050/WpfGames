@@ -94,6 +94,13 @@ namespace GobangServer
             {
                 for (; ; )
                 {
+                    BackgroundWorker worker = sender as BackgroundWorker;
+                    if (worker.CancellationPending)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+
                     // If the client close the socket, the Receive() method here returns null, indicating that this BackgroundWorker should be stopped.
                     JObject jsonPackage = Communication.Receive(clientSocket);
 
@@ -101,6 +108,7 @@ namespace GobangServer
                     {
                         UserGoOffline(clientSocket);
                         e.Cancel = true;
+                        return;
                     }
                     else
                     {
@@ -133,6 +141,15 @@ namespace GobangServer
                                 break;
                             case JsonPackageKeys.RejectMatch:
                                 RejectMatch(jsonPackage[JsonPackageKeys.Body]);
+                                break;
+                            case JsonPackageKeys.Order:
+                                ForwardOrder(jsonPackage[JsonPackageKeys.Body]);
+                                break;
+                            case JsonPackageKeys.AcceptOrder:
+                                ForwardOrderAcceptance(jsonPackage[JsonPackageKeys.Body]);
+                                break;
+                            case JsonPackageKeys.ChessPiecePosition:
+                                ForwardChessPiecePosition(jsonPackage[JsonPackageKeys.Body]);
                                 break;
                         }
                     }
@@ -354,7 +371,31 @@ namespace GobangServer
                     foreach (ClientInfo client in clientInfosBackup)
                         clientInfos.Enqueue(client);
                 }
+
+                // Dispose the offline user.
+                clientToGoOffline.Worker.CancelAsync();
             }
+        }
+
+        private static void ForwardOrder(JToken orderInfo)
+        {
+            string opponentAccount = orderInfo[JsonPackageKeys.Receiver].ToString();
+            ClientInfo opponent = FindClientByAccount(opponentAccount);
+            Communication.Send(opponent.ClientSocket, JsonPackageKeys.Order, orderInfo);
+        }
+
+        private static void ForwardOrderAcceptance(JToken orderInfo)
+        {
+            string opponentAccount = orderInfo[JsonPackageKeys.Receiver].ToString();
+            ClientInfo opponent = FindClientByAccount(opponentAccount);
+            Communication.Send(opponent.ClientSocket, JsonPackageKeys.AcceptOrder, orderInfo);
+        }
+
+        private static void ForwardChessPiecePosition(JToken chessPiecePositionInfo)
+        {
+            string receiverAccount = chessPiecePositionInfo[JsonPackageKeys.Receiver].ToString();
+            ClientInfo receiver = FindClientByAccount(receiverAccount);
+            Communication.Send(receiver.ClientSocket, JsonPackageKeys.ChessPiecePosition, chessPiecePositionInfo);
         }
     }
 }

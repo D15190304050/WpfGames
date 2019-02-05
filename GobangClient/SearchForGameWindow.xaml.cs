@@ -24,12 +24,16 @@ namespace GobangClient
     public partial class SearchForGameWindow : Window
     {
         private string localAccount;
-        private BackgroundWorker matchListener;
+        //private BackgroundWorker matchListener;
+        private Thread matchListener;
         private Timer requestForUserListsTimer;
+        private JToken finalMatchInfo;
+        private bool stopLintening;
 
         public SearchForGameWindow(string localAccount)
         {
             this.localAccount = localAccount;
+            stopLintening = false;
             InitializeComponent();
         }
 
@@ -46,14 +50,37 @@ namespace GobangClient
         {
             requestForUserListsTimer = new Timer(RequestUserLists, null, 0, 2000);
 
-            matchListener = new BackgroundWorker
-            {
-                WorkerReportsProgress = true,
-                WorkerSupportsCancellation = true,
-            };
+            //matchListener = new BackgroundWorker
+            //{
+            //    WorkerReportsProgress = true,
+            //    WorkerSupportsCancellation = true,
+            //};
 
-            matchListener.DoWork += ListenMatch;
-            matchListener.RunWorkerAsync();
+            matchListener = new Thread(ListenMatch);
+            matchListener.Start();
+
+            Thread startGame = new Thread(() =>
+            {
+                for (;;)
+                {
+                    if (matchListener.ThreadState == ThreadState.Stopped)
+                    {
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            new MainScene(localAccount, finalMatchInfo).Show();
+                            this.Close();
+                        });
+                        return;
+                    }
+
+                    Thread.Sleep(1000); 
+                }
+            });
+            startGame.Start();
+
+            //matchListener.DoWork += ListenMatch;
+            //matchListener.RunWorkerCompleted += EndStartMatch;
+            //matchListener.RunWorkerAsync();
         }
 
         // Refresh the idle user list and the playing user list every 2 seconds.
@@ -61,13 +88,6 @@ namespace GobangClient
         private void RequestUserLists(object state)
         {
             Communication.Send(JsonPackageKeys.RequestForUserList, "");
-        }
-
-        // Terminate the matchListener.
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            matchListener.CancelAsync();
-            requestForUserListsTimer.Dispose();
         }
 
         private void RequestForMatch(string opponentAccount)
@@ -80,10 +100,20 @@ namespace GobangClient
             Communication.Send(JsonPackageKeys.RequestForMatch, matchRequest);
         }
 
-        private void ListenMatch(object sender, DoWorkEventArgs e)
+        private void ListenMatch()
         {
             for (;;)
             {
+                //BackgroundWorker worker = sender as BackgroundWorker;
+                //if (worker.CancellationPending)
+                //{
+                //    e.Cancel = true;
+                //    return;
+                //}
+
+                if (stopLintening)
+                    return;
+
                 JObject[] responseMessages = Communication.ReceiveMessages();
                 for (int i = 0; i < responseMessages.Length; i++)
                 {
@@ -94,12 +124,11 @@ namespace GobangClient
                             MessageBox.Show(JsonPackageKeys.OpponentNotAvailable);
                             break;
                         case JsonPackageKeys.RequestForMatch:
-                            ResponseMatchRequest(responseMessage[JsonPackageKeys.Body][JsonPackageKeys.InitiatorAccount]
-                                .ToString());
+                            ResponseMatchRequest(responseMessage[JsonPackageKeys.Body]);
                             break;
                         case JsonPackageKeys.AcceptMatch:
                             MessageBox.Show("对方接受了您的比赛请求");
-                            StartMatch();
+                            BeginStartMatch(responseMessage[JsonPackageKeys.Body]);
                             break;
                         case JsonPackageKeys.UserList:
                             RefreshUserLists(responseMessage[JsonPackageKeys.Body]);
@@ -108,7 +137,7 @@ namespace GobangClient
                             MessageBox.Show("对方拒绝了您的比赛请求");
                             break;
                         default:
-                            MessageBox.Show(JsonPackageKeys.UnknownError + "\n" + responseMessage);
+                            MessageBox.Show(JsonPackageKeys.UnknownError + " in SearchForGameWindow\n" + "Raised by " + responseMessage[JsonPackageKeys.Body][JsonPackageKeys.Receiver] + "\n" + responseMessage);
                             break;
                     }
                 }
@@ -153,30 +182,41 @@ namespace GobangClient
             return result == MessageBoxResult.Yes;
         }
 
-        private void ResponseMatchRequest(string initiatorAccount)
+        private void ResponseMatchRequest(JToken matchInfo)
         {
-            object matchInfo = new
-            {
-                InitiatorAccount = initiatorAccount,
-                OpponentAccount = localAccount
-            };
+            string initiatorAccount = matchInfo[JsonPackageKeys.InitiatorAccount].ToString();
 
             // If accept the match request, send the acceptance response, close this window and show the match window.
             // Else, send the rejection response.
             if (AcceptMatch(initiatorAccount))
             {
                 Communication.Send(JsonPackageKeys.AcceptMatch, matchInfo);
-                StartMatch();
+                BeginStartMatch(JObject.FromObject(matchInfo));
             }
             else
                 Communication.Send(JsonPackageKeys.RejectMatch, matchInfo);
         }
 
         // Start game.
-        private void StartMatch()
+        private void BeginStartMatch(JToken matchInfo)
         {
-            this.Dispatcher.Invoke(() => new MainScene().Show());
-            this.Dispatcher.Invoke(this.Close);
+            finalMatchInfo = matchInfo;
+            requestForUserListsTimer.Dispose();
+            matchListener.Abort();
+            this.Dispatcher.Invoke(() =>
+            {
+                //matchListener.CancelAsync();
+                stopLintening = true;
+            });
+        }
+
+        private void EndStartMatch(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                new MainScene(localAccount, finalMatchInfo).Show();
+                this.Close();
+            });
         }
     }
 }

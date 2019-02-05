@@ -5,21 +5,74 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GobangClient"
         mc:Ignorable="d"
-        Title="MainScene" Height="450" Width="800"
-        Loaded="Window_Loaded"
-        >
+        Title="MainScene" Height="600" Width="1000"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Margin" Value="5" />
+        </Style>
+
+        <Style TargetType="StackPanel">
+            <Setter Property="Orientation" Value="Horizontal" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+        </Style>
+    </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Border Name="chessboardBorder" Grid.Row="0" BorderBrush="Black" BorderThickness="2" Margin="10" Width="{Binding ElementName=chessboardBorder, Path=ActualHeight}" HorizontalAlignment="Left" Background="LightYellow">
+        <!-- The chessboard. -->
+        <Border Name="chessboardBorder" Grid.Column="0" BorderBrush="Black" BorderThickness="2" Margin="10" Width="{Binding ElementName=chessboardBorder, Path=ActualHeight}" HorizontalAlignment="Left" Background="LightYellow">
             <Canvas Name="chessboardCanvas" />
         </Border>
 
-        
+        <!-- The grid to show match information. -->
+        <Grid Grid.Column="1" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Match information. -->
+            <Grid Background="BlueViolet">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Name="txtMatchInfo">比赛信息</TextBlock>
+
+                <TextBlock Grid.Row="1">我方</TextBlock>
+
+                <StackPanel Grid.Row="2" HorizontalAlignment="Right">
+                    <Ellipse Name="localAccountChessPiece" Height="{Binding ElementName=txtMatchInfo, Path=ActualHeight}" Width="{Binding ElementName=txtMatchInfo, Path=ActualHeight}" />
+                    <TextBlock Name="txtLocalAccount" Foreground="Blue" />
+                </StackPanel>
+
+                <TextBlock Grid.Row="3">对手</TextBlock>
+
+                <StackPanel Grid.Row="4" HorizontalAlignment="Right">
+                    <Ellipse Name="opponentAccountChessPiece" Height="{Binding ElementName=txtMatchInfo, Path=ActualHeight}" Width="{Binding ElementName=txtMatchInfo, Path=ActualHeight}" />
+                    <TextBlock Name="txtOpponentAccount" Foreground="PaleVioletRed" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Chatting area. -->
+            <ListBox Grid.Row="1" Name="lstChatting" BorderBrush="Blue" />
+
+            <TextBox Grid.Row="2" Name="txtMessageToSend" MaxLines="5" MinLines="5" Margin="0,5,0,5" BorderBrush="Black" />
+
+            <Button Grid.Row="3" HorizontalAlignment="Center" Padding="5">发送</Button>
+        </Grid>
     </Grid>
 </Window>

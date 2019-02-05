@@ -40,5 +40,15 @@ namespace GobangClient
         public const string OpponentNotAvailable = "该用户正在游戏中";
         public const string AcceptMatch = "AcceptMatch";
         public const string RejectMatch = "RejectMatch";
+        public const string BlackChessPieceUser = "BlackChessPieceUser";
+        public const string WhiteChessPieceUser = "WhiteChessPieceUser";
+        public const string Order = "Order";
+        public const string AcceptOrder = "AcceptOrder";
+        public const string ReNegotiateOrder = "ReNegotiateOrder";
+        public const string Sender = "Sender";
+        public const string Receiver = "Receiver";
+        public const string ChessPiecePosition = "ChessPiecePosition";
+        public const string ColumnIndex = "ColumnIndex";
+        public const string RowIndex = "RowIndex";
     }
 }

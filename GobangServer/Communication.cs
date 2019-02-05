@@ -51,6 +51,12 @@ namespace GobangServer
             }
             catch (SocketException)
             {
+                clientSocket.Close();
+                return null;
+            }
+            catch (ObjectDisposedException)
+            {
+                clientSocket.Close();
                 return null;
             }
         }

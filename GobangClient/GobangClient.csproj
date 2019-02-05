@@ -74,6 +74,9 @@
       <DependentUpon>NewPasswordPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="NoBlankRule.cs" />
+    <Compile Include="OrderNegotiationWindow.xaml.cs">
+      <DependentUpon>OrderNegotiationWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PasswordBoxHelper.cs" />
     <Compile Include="PasswordInfo.cs" />
     <Compile Include="PasswordRule.cs" />
@@ -117,6 +120,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="NewPasswordPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="OrderNegotiationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -7,8 +7,7 @@
         mc:Ignorable="d"
         Title="SearchForGameWindow" Height="450" Width="400"
         Background="BlanchedAlmond"
-        Loaded="Window_Loaded"
-        Closed="Window_Closed">
+        Loaded="Window_Loaded">
 
     <Window.Resources>
         <Style TargetType="TextBlock">
