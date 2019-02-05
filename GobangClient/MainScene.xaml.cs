@@ -37,11 +37,12 @@ namespace GobangClient
         private ChessPiece[,] chessboard;
         private Button[,] chessPieceButtons;
         private string localAccount;
-        private JToken matchInfo;
+        internal JToken matchInfo;
         private bool matchStarted;
         private bool canPutChess;
         private string opponentAccount;
         private ChessPiece color;
+        internal SearchForMatchWindow searchForMatchWindow;
 
         // Listen incoming messages.
         private BackgroundWorker messageListener;
@@ -81,11 +82,17 @@ namespace GobangClient
             DrawChessboardGridLines(numGridLines, chessboardColumnWidth, chessboardRowHeight);
             InitializeChessPieceButtons(numGridLines, chessboardColumnWidth, chessboardRowHeight);
 
-            messageListener.RunWorkerAsync();
+            //messageListener.RunWorkerAsync();
+        }
 
+        public new void Show()
+        {
+            base.Show();
             // Negotiate the order once both players entered the game.
             if (localAccount == matchInfo[JsonPackageKeys.InitiatorAccount].ToString())
                 new OrderNegotiationWindow(localAccount, matchInfo).Show();
+
+            MessageBox.Show("Here");
         }
 
         // Try data binding to make grid lines change adaptively.
@@ -189,8 +196,7 @@ namespace GobangClient
                         Receiver = opponentAccount
                     };
                     Communication.Send(JsonPackageKeys.Win, winMessage);
-                    MessageBox.Show("你赢了");
-                    this.Close();
+                    MatchOver("你赢了");
                 }
             }
         }
@@ -212,8 +218,7 @@ namespace GobangClient
                         ReceiveChessPiecePositionInfo(responseMessage[JsonPackageKeys.Body]);
                         break;
                     case JsonPackageKeys.Win:
-                        MessageBox.Show("你输了");
-                        this.Dispatcher.Invoke(this.Close);
+                        MatchOver("你输了");
                         break;
                 }
             }
@@ -230,7 +235,7 @@ namespace GobangClient
             return result == MessageBoxResult.Yes;
         }
 
-        private void ResponseOrderNegotiation(JToken orderInfo)
+        public void ResponseOrderNegotiation(JToken orderInfo)
         {
             if (AcceptOrder(orderInfo))
             {
@@ -249,7 +254,7 @@ namespace GobangClient
                 new OrderNegotiationWindow(localAccount, matchInfo).ShowDialog();
         }
 
-        private void StartMatch(JToken orderInfo)
+        public void StartMatch(JToken orderInfo)
         {
             // Initialize the user account text.
             string sender = orderInfo[JsonPackageKeys.Sender].ToString();
@@ -289,7 +294,7 @@ namespace GobangClient
                 canPutChess = true;
         }
 
-        private void ReceiveChessPiecePositionInfo(JToken chessPiecePositionInfo)
+        public void ReceiveChessPiecePositionInfo(JToken chessPiecePositionInfo)
         {
             object chessPieceStyle = color == ChessPiece.White ? Application.Current.Resources[BlackChessPieceStyle] : Application.Current.Resources[WhiteChessPieceStyle];
 
@@ -516,6 +521,17 @@ namespace GobangClient
             }
 
             return chessboardState.ToString();
+        }
+
+        public void MatchOver(string matchState)
+        {
+            MessageBox.Show(matchState);
+            this.Dispatcher.Invoke(() =>
+            {
+                new SearchForMatchWindow(localAccount).Show();
+                this.Hide();
+                searchForMatchWindow.Show();
+            });
         }
     }
 }

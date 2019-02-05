@@ -70,7 +70,8 @@ namespace GobangClient
                     case JsonPackageKeys.Success:
                         // Use Show() method so that the windows will not be blocked in the join test.
                         // In the standalone release part, the ShowDialog() method should be used.
-                        new SearchForGameWindow(accountToCommit.Account).Show();
+                        //new SearchForMatchWindow(accountToCommit.Account).Show();
+                        GameManager.StartGame(accountToCommit.Account);
                         this.Close();
                         break;
                     default:

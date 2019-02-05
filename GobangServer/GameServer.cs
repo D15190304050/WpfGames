@@ -328,6 +328,11 @@ namespace GobangServer
             // Actually, opponent can never be null.
             if (initiator != null)
                 Communication.Send(initiator.ClientSocket, JsonPackageKeys.AcceptMatch, responseMessage);
+
+            // Set their state.
+            FindClientByAccount(initiatorAccount).State = ClientState.Playing;
+            FindClientByAccount(responseMessage[JsonPackageKeys.OpponentAccount].ToString()).State =
+                ClientState.Playing;
         }
 
         private static void RejectMatch(JToken matchInfo)
