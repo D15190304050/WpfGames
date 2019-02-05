@@ -50,5 +50,6 @@ namespace GobangServer
         public const string ChessPiecePosition = "ChessPiecePosition";
         public const string ColumnIndex = "ColumnIndex";
         public const string RowIndex = "RowIndex";
+        public const string Win = "Win";
     }
 }

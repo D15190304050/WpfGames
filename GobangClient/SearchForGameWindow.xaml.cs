@@ -28,12 +28,12 @@ namespace GobangClient
         private Thread matchListener;
         private Timer requestForUserListsTimer;
         private JToken finalMatchInfo;
-        private bool stopLintening;
+        private bool stopListening;
 
         public SearchForGameWindow(string localAccount)
         {
             this.localAccount = localAccount;
-            stopLintening = false;
+            stopListening = false;
             InitializeComponent();
         }
 
@@ -111,7 +111,7 @@ namespace GobangClient
                 //    return;
                 //}
 
-                if (stopLintening)
+                if (stopListening)
                     return;
 
                 JObject[] responseMessages = Communication.ReceiveMessages();
@@ -206,7 +206,7 @@ namespace GobangClient
             this.Dispatcher.Invoke(() =>
             {
                 //matchListener.CancelAsync();
-                stopLintening = true;
+                stopListening = true;
             });
         }
 

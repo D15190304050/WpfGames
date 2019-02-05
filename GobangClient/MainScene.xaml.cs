@@ -28,11 +28,11 @@ namespace GobangClient
         /// </summary>
         private const int ChessboardSize = 15;
 
+        private const int LineSize = 5;
+
         private const string ChessPieceStyle = "ChessPieceStyle";
         private const string BlackChessPieceStyle = "BlackChessPieceStyle";
         private const string WhiteChessPieceStyle = "WhiteChessPieceStyle";
-        private const bool White = true;
-        private const bool Black = false;
 
         private ChessPiece[,] chessboard;
         private Button[,] chessPieceButtons;
@@ -40,8 +40,8 @@ namespace GobangClient
         private JToken matchInfo;
         private bool matchStarted;
         private bool canPutChess;
-        private bool color;
         private string opponentAccount;
+        private ChessPiece color;
 
         // Listen incoming messages.
         private BackgroundWorker messageListener;
@@ -50,10 +50,18 @@ namespace GobangClient
         {
             matchStarted = false;
             canPutChess = false;
-            chessboard = new ChessPiece[ChessboardSize, ChessboardSize];
+            
             chessPieceButtons = new Button[ChessboardSize, ChessboardSize];
             this.localAccount = localAccount;
             this.matchInfo = matchInfo;
+
+            chessboard = new ChessPiece[ChessboardSize, ChessboardSize];
+            for (int i = 0; i < ChessboardSize; i++)
+            {
+                for (int j = 0; j < ChessboardSize; j++)
+                    chessboard[i, j] = ChessPiece.Blank;
+            }
+
             messageListener = new BackgroundWorker
             {
                 WorkerReportsProgress = true,
@@ -146,17 +154,10 @@ namespace GobangClient
 
                 Button clickedButton = e.OriginalSource as Button;
                 object chessPieceStyle;
-                ChessPiece chessPiece;
-                if (color == White)
-                {
+                if (color == ChessPiece.White)
                     chessPieceStyle = Application.Current.Resources[WhiteChessPieceStyle];
-                    chessPiece = ChessPiece.White;
-                }
                 else
-                {
                     chessPieceStyle = Application.Current.Resources[BlackChessPieceStyle];
-                    chessPiece = ChessPiece.White;
-                }
 
                 Ellipse chessPieceCircle = new Ellipse();
                 Canvas.SetLeft(chessPieceCircle, Canvas.GetLeft(clickedButton));
@@ -178,9 +179,19 @@ namespace GobangClient
                     RowIndex = rowIndex,
                 };
                 Communication.Send(JsonPackageKeys.ChessPiecePosition, chessPiecePositionInfo);
-                chessboard[columnIndex, rowIndex] = chessPiece;
+                chessboard[rowIndex, columnIndex] = color;
 
-                MessageBox.Show(columnIndex + ", " + rowIndex);
+                if (Win(rowIndex, columnIndex))
+                {
+                    object winMessage = new
+                    {
+                        Sender = localAccount,
+                        Receiver = opponentAccount
+                    };
+                    Communication.Send(JsonPackageKeys.Win, winMessage);
+                    MessageBox.Show("你赢了");
+                    this.Close();
+                }
             }
         }
 
@@ -199,6 +210,10 @@ namespace GobangClient
                         break;
                     case JsonPackageKeys.ChessPiecePosition:
                         ReceiveChessPiecePositionInfo(responseMessage[JsonPackageKeys.Body]);
+                        break;
+                    case JsonPackageKeys.Win:
+                        MessageBox.Show("你输了");
+                        this.Dispatcher.Invoke(this.Close);
                         break;
                 }
             }
@@ -257,7 +272,7 @@ namespace GobangClient
                     localAccountChessPiece.Fill = Brushes.White;
                     opponentAccountChessPiece.Fill = Brushes.Black;
                 });
-                color = White;
+                color = ChessPiece.White;
             }
             else
             {
@@ -266,7 +281,7 @@ namespace GobangClient
                     localAccountChessPiece.Fill = Brushes.Black;
                     opponentAccountChessPiece.Fill = Brushes.White;
                 });
-                color = Black;
+                color = ChessPiece.Black;
             }
 
             matchStarted = true;
@@ -276,14 +291,14 @@ namespace GobangClient
 
         private void ReceiveChessPiecePositionInfo(JToken chessPiecePositionInfo)
         {
-            object chessPieceStyle = color == White ? Application.Current.Resources[BlackChessPieceStyle] : Application.Current.Resources[WhiteChessPieceStyle];
+            object chessPieceStyle = color == ChessPiece.White ? Application.Current.Resources[BlackChessPieceStyle] : Application.Current.Resources[WhiteChessPieceStyle];
 
             int columnIndex = int.Parse(chessPiecePositionInfo[JsonPackageKeys.ColumnIndex].ToString());
             int rowIndex = int.Parse(chessPiecePositionInfo[JsonPackageKeys.RowIndex].ToString());
             this.Dispatcher.Invoke(() =>
             {
-                ChessPiece chessPiece = color == White ? ChessPiece.Black : ChessPiece.White;
-                chessboard[rowIndex, columnIndex] = chessPiece;
+                ChessPiece opponentChessPiece = color == ChessPiece.White ? ChessPiece.Black : ChessPiece.White;
+                chessboard[rowIndex, columnIndex] = opponentChessPiece;
                 chessboardCanvas.Children.Remove(chessPieceButtons[rowIndex, columnIndex]);
                 Button clickedButton = chessPieceButtons[rowIndex, columnIndex];
                 Ellipse chessPieceCircle = new Ellipse();
@@ -297,6 +312,210 @@ namespace GobangClient
             });
             chessPieceButtons[rowIndex, columnIndex] = null;
             canPutChess = true;
+        }
+
+        // Returns true if the local account wins, otherwise, false.
+        private bool Win(int rowIndex, int columnIndex)
+        {
+            return CheckRow(rowIndex, columnIndex) || CheckColumn(rowIndex, columnIndex) || CheckMainDiagonal(rowIndex, columnIndex) || CheckAntiDiagonal(rowIndex, columnIndex);
+        }
+
+        private bool CheckRow(int rowIndex, int columnIndex)
+        {
+            // Starts from 1 since the given chess piece is also a chess piece having the same color.
+            int connectedChessPieces = 1;
+            int adjacentColumnIndex;
+
+            // Go left, at most 4 steps.
+            // Make the column index vary consistently as (columnIndex + i).
+            // Don't forget to validate the boundary of the index.
+            for (int i = -1; i >= -(LineSize - 1); i--)
+            {
+                adjacentColumnIndex = columnIndex + i;
+                if ((adjacentColumnIndex >= 0) &&
+                    (adjacentColumnIndex < ChessboardSize) &&
+                    (chessboard[rowIndex, adjacentColumnIndex] == color))
+                {
+                    connectedChessPieces++;
+                    if (connectedChessPieces == LineSize)
+                        return true;
+                }
+                else
+                    break;
+            }
+
+            // Go right, at most 4 steps.
+            // Note that the connectedChessPieces won't start from 1 again, so once it equals 5, return true immediately.
+            for (int i = 1; i <= (LineSize - 1); i++)
+            {
+                adjacentColumnIndex = columnIndex + i;
+                if ((adjacentColumnIndex >= 0) &&
+                    (adjacentColumnIndex < ChessboardSize) &&
+                    (chessboard[rowIndex, adjacentColumnIndex] == color))
+                {
+                    connectedChessPieces++;
+                    if (connectedChessPieces == LineSize)
+                        return true;
+                }
+                else
+                    break;
+            }
+
+            return false;
+        }
+
+        private bool CheckColumn(int rowIndex, int columnIndex)
+        {
+            int connectedChessPieces = 1;
+            int adjacentRowIndex;
+
+            for (int i = -1; i >= -(LineSize - 1); i--)
+            {
+                adjacentRowIndex = rowIndex + i;
+                if ((adjacentRowIndex >= 0) &&
+                    (adjacentRowIndex < ChessboardSize) &&
+                    (chessboard[adjacentRowIndex, columnIndex] == color))
+                {
+                    connectedChessPieces++;
+                    if (connectedChessPieces == LineSize)
+                        return true;
+                }
+                else
+                    break;
+            }
+
+            for (int i = 1; i <= (LineSize - 1); i++)
+            {
+                adjacentRowIndex = rowIndex + i;
+                if ((adjacentRowIndex >= 0) &&
+                    (adjacentRowIndex < ChessboardSize) &&
+                    (chessboard[adjacentRowIndex, columnIndex] == color))
+                {
+                    connectedChessPieces++;
+                    if (connectedChessPieces == LineSize)
+                        return true;
+                }
+                else
+                    break;
+            }
+
+            return false;
+        }
+
+        private bool CheckMainDiagonal(int rowIndex, int columnIndex)
+        {
+            int connectedChessPieces = 1;
+            int adjacentRowIndex;
+            int adjacentColumnIndex;
+
+            // Go up-left.
+            for (int i = -1; i >= -(LineSize - 1); i--)
+            {
+                adjacentRowIndex = rowIndex + i;
+                adjacentColumnIndex = columnIndex + i;
+                if ((adjacentRowIndex >= 0) &&
+                    (adjacentRowIndex < ChessboardSize) &&
+                    (adjacentColumnIndex >= 0) &&
+                    (adjacentColumnIndex < ChessboardSize) &&
+                    (chessboard[adjacentRowIndex, adjacentColumnIndex] == color))
+                {
+                    connectedChessPieces++;
+                    if (connectedChessPieces == LineSize)
+                        return true;
+                }
+                else
+                    break;
+            }
+
+            // Go down-right.
+            for (int i = 1; i <= (LineSize - 1); i++)
+            {
+                adjacentRowIndex = rowIndex + i;
+                adjacentColumnIndex = columnIndex + i;
+                if ((adjacentRowIndex >= 0) &&
+                    (adjacentRowIndex < ChessboardSize) &&
+                    (adjacentColumnIndex >= 0) &&
+                    (adjacentColumnIndex < ChessboardSize) &&
+                    (chessboard[adjacentRowIndex, adjacentColumnIndex] == color))
+                {
+                    connectedChessPieces++;
+                    if (connectedChessPieces == LineSize)
+                        return true;
+                }
+                else
+                    break;
+            }
+
+            return false;
+        }
+
+        private bool CheckAntiDiagonal(int rowIndex, int columnIndex)
+        {
+            int connectedChessPieces = 1;
+            int adjacentRowIndex;
+            int adjacentColumnIndex;
+
+            // Go up-right.
+            // adjacentColumnIndex: increase;
+            // adjacentRowIndex: decrease.
+            for (int i = 1; i <= (LineSize - 1); i++)
+            {
+                adjacentRowIndex = rowIndex - i;
+                adjacentColumnIndex = columnIndex + i;
+                if ((adjacentRowIndex >= 0) &&
+                    (adjacentRowIndex < ChessboardSize) &&
+                    (adjacentColumnIndex >= 0) &&
+                    (adjacentColumnIndex < ChessboardSize) &&
+                    (chessboard[adjacentRowIndex, adjacentColumnIndex] == color))
+                {
+                    connectedChessPieces++;
+                    if (connectedChessPieces == LineSize)
+                        return true;
+                }
+                else
+                    break;
+            }
+
+            // Go down-left.
+            // adjacentColumnIndex: decrease;
+            // adjacentRowIndex: increase.
+            for (int i = 1; i <= (LineSize - 1); i++)
+            {
+                adjacentRowIndex = rowIndex + i;
+                adjacentColumnIndex = columnIndex - i;
+                if ((adjacentRowIndex >= 0) &&
+                    (adjacentRowIndex < ChessboardSize) &&
+                    (adjacentColumnIndex >= 0) &&
+                    (adjacentColumnIndex < ChessboardSize) &&
+                    (chessboard[adjacentRowIndex, adjacentColumnIndex] == color))
+                {
+                    connectedChessPieces++;
+                    if (connectedChessPieces == LineSize)
+                        return true;
+                }
+                else
+                    break;
+            }
+
+            return false;
+        }
+
+        private string GetChessboardState()
+        {
+            StringBuilder chessboardState = new StringBuilder();
+            for (int i = 0; i < ChessboardSize; i++)
+            {
+                for (int j = 0; j < ChessboardSize; j++)
+                {
+                    chessboardState.Append(((int)chessboard[i, j]).ToString());
+                    if (j != ChessboardSize - 1)
+                        chessboardState.Append("  ");
+                }
+
+                chessboardState.Append("\n");
+            }
+
+            return chessboardState.ToString();
         }
     }
 }

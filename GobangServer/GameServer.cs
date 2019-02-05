@@ -151,6 +151,9 @@ namespace GobangServer
                             case JsonPackageKeys.ChessPiecePosition:
                                 ForwardChessPiecePosition(jsonPackage[JsonPackageKeys.Body]);
                                 break;
+                            case JsonPackageKeys.Win:
+                                ForwardMatchResult(jsonPackage[JsonPackageKeys.Body]);
+                                break;
                         }
                     }
                 }
@@ -396,6 +399,13 @@ namespace GobangServer
             string receiverAccount = chessPiecePositionInfo[JsonPackageKeys.Receiver].ToString();
             ClientInfo receiver = FindClientByAccount(receiverAccount);
             Communication.Send(receiver.ClientSocket, JsonPackageKeys.ChessPiecePosition, chessPiecePositionInfo);
+        }
+
+        private static void ForwardMatchResult(JToken matchResult)
+        {
+            string receiverAccount = matchResult[JsonPackageKeys.Receiver].ToString();
+            ClientInfo receiver = FindClientByAccount(receiverAccount);
+            Communication.Send(receiver.ClientSocket, JsonPackageKeys.Win, matchResult);
         }
     }
 }
