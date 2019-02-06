@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Windows;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace GobangClient
 {
@@ -14,22 +15,28 @@ namespace GobangClient
     {
         private static SearchForMatchWindow searchForMatchWindow;
         private static MainScene mainScene;
+        private static BackgroundWorker worker;
 
         public static void StartGame(string localAccount)
         {
             searchForMatchWindow = new SearchForMatchWindow(localAccount);
-            mainScene = new MainScene(localAccount, null);
-            searchForMatchWindow.mainScene = mainScene;
-            mainScene.searchForMatchWindow = searchForMatchWindow;
+            mainScene = new MainScene(localAccount);
+            searchForMatchWindow.MainScene = mainScene;
+            mainScene.SearchForMatchWindow = searchForMatchWindow;
 
             searchForMatchWindow.Show();
             mainScene.Hide();
 
-            BackgroundWorker worker = new BackgroundWorker
+            worker = new BackgroundWorker
             {
                 WorkerReportsProgress = true,
                 WorkerSupportsCancellation = true,
             };
+
+            // Make sure all resources will be closed when the user close the window.
+            searchForMatchWindow.Closing += (sender, e) => Close();
+            mainScene.Closing += (sender, e) => Close();
+
             worker.DoWork += ListenServerMessages;
             worker.RunWorkerAsync();
         }
@@ -80,12 +87,21 @@ namespace GobangClient
                         case JsonPackageKeys.Win:
                             mainScene.MatchOver("你输了");
                             break;
+                        case JsonPackageKeys.TextMessage:
+                            mainScene.ReceiveTextMessage(responseMessage[JsonPackageKeys.Body]);
+                            break;
                         default:
                             MessageBox.Show(JsonPackageKeys.UnknownError + "\n" + responseMessage);
                             break;
                     }
                 }
             }
+        }
+
+        private static void Close()
+        {
+            worker.CancelAsync();
+            Process.GetCurrentProcess().Kill();
         }
     }
 }

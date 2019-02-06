@@ -51,5 +51,7 @@ namespace GobangClient
         public const string ColumnIndex = "ColumnIndex";
         public const string RowIndex = "RowIndex";
         public const string Win = "Win";
+        public const string TextMessage = "TextMessage";
+        public const string Content = "Content";
     }
 }

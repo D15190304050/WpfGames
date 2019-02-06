@@ -27,7 +27,6 @@ namespace GobangClient
         /// By convention, Gobang is a game played on 15*15 chessboard by two players.
         /// </summary>
         private const int ChessboardSize = 15;
-
         private const int LineSize = 5;
 
         private const string ChessPieceStyle = "ChessPieceStyle";
@@ -36,43 +35,28 @@ namespace GobangClient
 
         private ChessPiece[,] chessboard;
         private Button[,] chessPieceButtons;
+        private LinkedList<Ellipse> chessPieceCircles;
         private string localAccount;
-        internal JToken matchInfo;
         private bool matchStarted;
-        private bool canPutChess;
+        private bool canPutChessPiece;
         private string opponentAccount;
         private ChessPiece color;
-        internal SearchForMatchWindow searchForMatchWindow;
+        
+        public JToken MatchInfo { get; set; }
 
-        // Listen incoming messages.
-        private BackgroundWorker messageListener;
+        public SearchForMatchWindow SearchForMatchWindow { get; set; }
 
-        public MainScene(string localAccount, JToken matchInfo)
+        public MainScene(string localAccount)
         {
-            matchStarted = false;
-            canPutChess = false;
-            
             chessPieceButtons = new Button[ChessboardSize, ChessboardSize];
+            chessPieceCircles = new LinkedList<Ellipse>();
             this.localAccount = localAccount;
-            this.matchInfo = matchInfo;
-
             chessboard = new ChessPiece[ChessboardSize, ChessboardSize];
-            for (int i = 0; i < ChessboardSize; i++)
-            {
-                for (int j = 0; j < ChessboardSize; j++)
-                    chessboard[i, j] = ChessPiece.Blank;
-            }
-
-            messageListener = new BackgroundWorker
-            {
-                WorkerReportsProgress = true,
-                WorkerSupportsCancellation = true
-            };
-            messageListener.DoWork += ListenOpponentMessage;
 
             InitializeComponent();
         }
 
+        // Draw grid lines once the window is loaded.
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             int numGridLines = ChessboardSize - 1;
@@ -80,19 +64,58 @@ namespace GobangClient
             double chessboardRowHeight = chessboardCanvas.ActualHeight / numGridLines;
 
             DrawChessboardGridLines(numGridLines, chessboardColumnWidth, chessboardRowHeight);
-            InitializeChessPieceButtons(numGridLines, chessboardColumnWidth, chessboardRowHeight);
+        }
 
-            //messageListener.RunWorkerAsync();
+        // Clear all user movements.
+        private void Restart()
+        {
+            // Clear placed chess pieces, which is stored in chessPieceCircles.
+            foreach (Ellipse e in chessPieceCircles)
+                chessboardCanvas.Children.Remove(e);
+
+            // Clear the chess piece collection.
+            chessPieceCircles.Clear();
+
+            // Clear message area.
+            lstChatting.Items.Clear();
+            txtMessageToSend.Clear();
+
+            // Clear match information.
+            txtLocalAccount.Text = "";
+            txtOpponentAccount.Text = "";
+            localAccountChessPiece.Fill = Brushes.Transparent;
+            opponentAccountChessPiece.Fill = Brushes.Transparent;
+
+            // Remove chess piece buttons and reset the chessboard.
+            for (int i = 0; i < ChessboardSize; i++)
+            {
+                for (int j = 0; j < ChessboardSize; j++)
+                {
+                    chessboardCanvas.Children.Remove(chessPieceButtons[i, j]);
+                    chessPieceButtons[i, j] = null;
+                    chessboard[i, j] = ChessPiece.Blank;
+                }
+            }
+
+            // Reset match state.
+            matchStarted = false;
+            canPutChessPiece = false;
+
+            // Draw chess piece buttons.
+            int numGridLines = ChessboardSize - 1;
+            double chessboardColumnWidth = chessboardCanvas.ActualWidth / numGridLines;
+            double chessboardRowHeight = chessboardCanvas.ActualHeight / numGridLines;
+            InitializeChessPieceButtons(numGridLines, chessboardColumnWidth, chessboardRowHeight);
         }
 
         public new void Show()
         {
             base.Show();
-            // Negotiate the order once both players entered the game.
-            if (localAccount == matchInfo[JsonPackageKeys.InitiatorAccount].ToString())
-                new OrderNegotiationWindow(localAccount, matchInfo).Show();
+            Restart();
 
-            MessageBox.Show("Here");
+            // Negotiate the order once both players entered the game.
+            if (localAccount == MatchInfo[JsonPackageKeys.InitiatorAccount].ToString())
+                new OrderNegotiationWindow(localAccount, MatchInfo).Show();
         }
 
         // Try data binding to make grid lines change adaptively.
@@ -128,26 +151,28 @@ namespace GobangClient
         // It seems that this method cannot be refactored by data binding.
         private void InitializeChessPieceButtons(int numGridLines, double chessboardColumnWidth, double chessboardRowHeight)
         {
-            // i: columnIndex
-            // j: rowIndex
-            for (int i = 0; i <= numGridLines; i++)
+            for (int rowIndex = 0; rowIndex <= numGridLines; rowIndex++)
             {
-                for (int j = 0; j <= numGridLines; j++)
+                for (int columnIndex = 0; columnIndex <= numGridLines; columnIndex++)
                 {
-                    Button chessPiece = new Button();
-                    Canvas.SetLeft(chessPiece, chessboardColumnWidth * i - chessboardColumnWidth / 2);
-                    Canvas.SetTop(chessPiece, chessboardRowHeight * j - chessboardRowHeight / 2);
-                    chessPiece.Height = chessboardRowHeight;
-                    chessPiece.Width = chessboardColumnWidth;
-                    chessPiece.Click += cmdPutChessPiece_Click;
+                    // Put the button on the right position.
+                    Button chessPieceButton = new Button();
+                    Canvas.SetLeft(chessPieceButton, chessboardColumnWidth * columnIndex - chessboardColumnWidth / 2);
+                    Canvas.SetTop(chessPieceButton, chessboardRowHeight * rowIndex - chessboardRowHeight / 2);
+                    chessPieceButton.Height = chessboardRowHeight;
+                    chessPieceButton.Width = chessboardColumnWidth;
+                    chessPieceButton.Click += cmdPutChessPiece_Click;
 
                     // Set the pre-defined style for buttons of chess pieces.
                     object chessPieceStyle = Application.Current.Resources[ChessPieceStyle];
-                    chessPiece.SetValue(Button.StyleProperty, chessPieceStyle);
-                    chessboardCanvas.Children.Add(chessPiece);
+                    chessPieceButton.SetValue(Button.StyleProperty, chessPieceStyle);
 
-                    chessPiece.Tag = i + "," + j;
-                    chessPieceButtons[j, i] = chessPiece;
+                    // Add it to the canvas so that it can be active.
+                    chessboardCanvas.Children.Add(chessPieceButton);
+
+                    // Mark the button's metadata.
+                    chessPieceButton.Tag = rowIndex + "," + columnIndex;
+                    chessPieceButtons[rowIndex, columnIndex] = chessPieceButton;
                 }
             }
         }
@@ -155,29 +180,42 @@ namespace GobangClient
         // Put the chess piece to the specified position.
         private void cmdPutChessPiece_Click(object sender, RoutedEventArgs e)
         {
-            if (matchStarted && canPutChess)
+            if (matchStarted && canPutChessPiece)
             {
-                canPutChess = false;
+                canPutChessPiece = false;
 
+                // Get the clicked button.
                 Button clickedButton = e.OriginalSource as Button;
-                object chessPieceStyle;
-                if (color == ChessPiece.White)
-                    chessPieceStyle = Application.Current.Resources[WhiteChessPieceStyle];
-                else
-                    chessPieceStyle = Application.Current.Resources[BlackChessPieceStyle];
 
+                // Get the corresponding style.
+                object chessPieceStyle = color == ChessPiece.White
+                    ? Application.Current.Resources[WhiteChessPieceStyle]
+                    : Application.Current.Resources[BlackChessPieceStyle];
+
+                // Create the chess piece circle and set its properties.
                 Ellipse chessPieceCircle = new Ellipse();
+                chessPieceCircles.AddLast(chessPieceCircle);
                 Canvas.SetLeft(chessPieceCircle, Canvas.GetLeft(clickedButton));
                 Canvas.SetTop(chessPieceCircle, Canvas.GetTop(clickedButton));
                 chessPieceCircle.Width = clickedButton.ActualWidth;
                 chessPieceCircle.Height = clickedButton.ActualHeight;
                 chessPieceCircle.SetValue(Ellipse.StyleProperty, chessPieceStyle);
-                chessboardCanvas.Children.Remove(clickedButton);
-                chessboardCanvas.Children.Add(chessPieceCircle);
-                string[] positionTag = clickedButton.Tag.ToString().Split(',');
-                int columnIndex = int.Parse(positionTag[0]);
-                int rowIndex = int.Parse(positionTag[1]);
 
+                // Remove the button so that it cannot be clicked again.
+                chessboardCanvas.Children.Remove(clickedButton);
+
+                // Add the ellipse to the canvas so that it can be seen.
+                chessboardCanvas.Children.Add(chessPieceCircle);
+
+                // Get the position of the clicked button.
+                string[] positionTag = clickedButton.Tag.ToString().Split(',');
+                int rowIndex = int.Parse(positionTag[0]);
+                int columnIndex = int.Parse(positionTag[1]);
+
+                // Set it to null so that GC can free the space when it is free.
+                chessPieceButtons[rowIndex, columnIndex] = null;
+
+                // Send chess piece position information to the opponent.
                 object chessPiecePositionInfo = new
                 {
                     Sender = localAccount,
@@ -186,8 +224,11 @@ namespace GobangClient
                     RowIndex = rowIndex,
                 };
                 Communication.Send(JsonPackageKeys.ChessPiecePosition, chessPiecePositionInfo);
+
+                // Mark the color at the clicked position.
                 chessboard[rowIndex, columnIndex] = color;
 
+                // Judge if the user wins.
                 if (Win(rowIndex, columnIndex))
                 {
                     object winMessage = new
@@ -201,27 +242,54 @@ namespace GobangClient
             }
         }
 
-        private void ListenOpponentMessage(object sender, DoWorkEventArgs e)
+        public void ReceiveChessPiecePositionInfo(JToken chessPiecePositionInfo)
         {
-            for (;;)
+            canPutChessPiece = true;
+
+            // Determine the opponent's chess piece style and color.
+            object opponentChessPieceStyle;
+            ChessPiece opponentChessPiece;
+            if (color == ChessPiece.White)
             {
-                JObject responseMessage = Communication.ReceiveMessage();
-                switch (responseMessage[JsonPackageKeys.Type].ToString())
-                {
-                    case JsonPackageKeys.Order:
-                        ResponseOrderNegotiation(responseMessage[JsonPackageKeys.Body]);
-                        break;
-                    case JsonPackageKeys.AcceptOrder:
-                        StartMatch(responseMessage[JsonPackageKeys.Body]);
-                        break;
-                    case JsonPackageKeys.ChessPiecePosition:
-                        ReceiveChessPiecePositionInfo(responseMessage[JsonPackageKeys.Body]);
-                        break;
-                    case JsonPackageKeys.Win:
-                        MatchOver("你输了");
-                        break;
-                }
+                opponentChessPieceStyle = Application.Current.Resources[BlackChessPieceStyle];
+                opponentChessPiece = ChessPiece.Black;
             }
+            else
+            {
+                opponentChessPieceStyle = Application.Current.Resources[WhiteChessPieceStyle];
+                opponentChessPiece = ChessPiece.White;
+            }
+
+            // Get the position of the clicked button.
+            int columnIndex = int.Parse(chessPiecePositionInfo[JsonPackageKeys.ColumnIndex].ToString());
+            int rowIndex = int.Parse(chessPiecePositionInfo[JsonPackageKeys.RowIndex].ToString());
+
+            // Mark the color at the clicked position.
+            chessboard[rowIndex, columnIndex] = opponentChessPiece;
+
+            // Get the clicked button.
+            Button clickedButton = chessPieceButtons[rowIndex, columnIndex];
+
+            this.Dispatcher.Invoke(() =>
+            {
+                // Remove the button so that it cannot be clicked again.
+                chessboardCanvas.Children.Remove(clickedButton);
+
+                // Create the chess piece circle and set its properties.
+                Ellipse chessPieceCircle = new Ellipse();
+                chessPieceCircles.AddLast(chessPieceCircle);
+                Canvas.SetLeft(chessPieceCircle, Canvas.GetLeft(clickedButton));
+                Canvas.SetTop(chessPieceCircle, Canvas.GetTop(clickedButton));
+                chessPieceCircle.Width = clickedButton.ActualWidth;
+                chessPieceCircle.Height = clickedButton.ActualHeight;
+                chessPieceCircle.SetValue(Ellipse.StyleProperty, opponentChessPieceStyle);
+
+                // Add the ellipse to the canvas so that it can be seen.
+                chessboardCanvas.Children.Add(chessPieceCircle);
+            });
+
+            // Set it to null so that GC can free the space when it is free.
+            chessPieceButtons[rowIndex, columnIndex] = null;
         }
 
         private bool AcceptOrder(JToken orderInfo)
@@ -251,7 +319,7 @@ namespace GobangClient
                 StartMatch(orderInfo);
             }
             else
-                new OrderNegotiationWindow(localAccount, matchInfo).ShowDialog();
+                this.Dispatcher.Invoke(() => new OrderNegotiationWindow(localAccount, MatchInfo).Show());
         }
 
         public void StartMatch(JToken orderInfo)
@@ -260,26 +328,17 @@ namespace GobangClient
             string sender = orderInfo[JsonPackageKeys.Sender].ToString();
             string receiver = orderInfo[JsonPackageKeys.Receiver].ToString();
             opponentAccount = sender;
-
             this.Dispatcher.Invoke(() =>
             {
                 txtLocalAccount.Text = localAccount;
                 txtOpponentAccount.Text = localAccount == sender ? receiver : sender;
             });
 
-            string whiteChessPieceUser = orderInfo[JsonPackageKeys.WhiteChessPieceUser].ToString();
+            // Get the account fo the black chess piece user.
             string blackChessPieceUser = orderInfo[JsonPackageKeys.BlackChessPieceUser].ToString();
 
-            if (whiteChessPieceUser == localAccount)
-            {
-                this.Dispatcher.Invoke(() =>
-                {
-                    localAccountChessPiece.Fill = Brushes.White;
-                    opponentAccountChessPiece.Fill = Brushes.Black;
-                });
-                color = ChessPiece.White;
-            }
-            else
+            // Set user colors.
+            if (blackChessPieceUser == localAccount)
             {
                 this.Dispatcher.Invoke(() =>
                 {
@@ -288,35 +347,22 @@ namespace GobangClient
                 });
                 color = ChessPiece.Black;
             }
-
-            matchStarted = true;
-            if (localAccount == blackChessPieceUser)
-                canPutChess = true;
-        }
-
-        public void ReceiveChessPiecePositionInfo(JToken chessPiecePositionInfo)
-        {
-            object chessPieceStyle = color == ChessPiece.White ? Application.Current.Resources[BlackChessPieceStyle] : Application.Current.Resources[WhiteChessPieceStyle];
-
-            int columnIndex = int.Parse(chessPiecePositionInfo[JsonPackageKeys.ColumnIndex].ToString());
-            int rowIndex = int.Parse(chessPiecePositionInfo[JsonPackageKeys.RowIndex].ToString());
-            this.Dispatcher.Invoke(() =>
+            else
             {
-                ChessPiece opponentChessPiece = color == ChessPiece.White ? ChessPiece.Black : ChessPiece.White;
-                chessboard[rowIndex, columnIndex] = opponentChessPiece;
-                chessboardCanvas.Children.Remove(chessPieceButtons[rowIndex, columnIndex]);
-                Button clickedButton = chessPieceButtons[rowIndex, columnIndex];
-                Ellipse chessPieceCircle = new Ellipse();
-                Canvas.SetLeft(chessPieceCircle, Canvas.GetLeft(clickedButton));
-                Canvas.SetTop(chessPieceCircle, Canvas.GetTop(clickedButton));
-                chessPieceCircle.Width = clickedButton.ActualWidth;
-                chessPieceCircle.Height = clickedButton.ActualHeight;
-                chessPieceCircle.SetValue(Ellipse.StyleProperty, chessPieceStyle);
-                chessboardCanvas.Children.Remove(clickedButton);
-                chessboardCanvas.Children.Add(chessPieceCircle);
-            });
-            chessPieceButtons[rowIndex, columnIndex] = null;
-            canPutChess = true;
+                this.Dispatcher.Invoke(() =>
+                {
+                    localAccountChessPiece.Fill = Brushes.White;
+                    opponentAccountChessPiece.Fill = Brushes.Black;
+                });
+                color = ChessPiece.White;
+            }
+
+            // Mark the match state as started.
+            matchStarted = true;
+
+            // Black first.
+            if (localAccount == blackChessPieceUser)
+                canPutChessPiece = true;
         }
 
         // Returns true if the local account wins, otherwise, false.
@@ -505,6 +551,7 @@ namespace GobangClient
             return false;
         }
 
+        // A test method.
         private string GetChessboardState()
         {
             StringBuilder chessboardState = new StringBuilder();
@@ -523,15 +570,41 @@ namespace GobangClient
             return chessboardState.ToString();
         }
 
-        public void MatchOver(string matchState)
+        public void MatchOver(string matchResult)
         {
-            MessageBox.Show(matchState);
+            MessageBox.Show(matchResult);
             this.Dispatcher.Invoke(() =>
             {
-                new SearchForMatchWindow(localAccount).Show();
+                //new SearchForMatchWindow(localAccount).Show();
                 this.Hide();
-                searchForMatchWindow.Show();
+                SearchForMatchWindow.Show();
             });
+        }
+
+        private void cmdSendMessage_Click(object sender, RoutedEventArgs e)
+        {
+            // Send text message to the opponent.
+            Object textMessage = new
+            {
+                Sender = localAccount,
+                Receiver = opponentAccount,
+                Content = txtMessageToSend.Text
+            };
+            Communication.Send(JsonPackageKeys.TextMessage, textMessage);
+
+            // Add text message to the chatting box.
+            string formattedMessage = localAccount + " " + DateTime.Now + ":" + Environment.NewLine + txtMessageToSend.Text;
+            lstChatting.Items.Add(formattedMessage);
+            txtMessageToSend.Clear();
+        }
+
+        public void ReceiveTextMessage(JToken textMessage)
+        {
+            string sender = textMessage[JsonPackageKeys.Sender].ToString();
+            string content = textMessage[JsonPackageKeys.Content].ToString();
+
+            string formattedMessage = sender + " " + " " + DateTime.Now + ":" + Environment.NewLine + content;
+            this.Dispatcher.Invoke(() => lstChatting.Items.Add(formattedMessage));
         }
     }
 }

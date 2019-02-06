@@ -72,7 +72,7 @@
 
             <TextBox Grid.Row="2" Name="txtMessageToSend" MaxLines="5" MinLines="5" Margin="0,5,0,5" BorderBrush="Black" />
 
-            <Button Grid.Row="3" HorizontalAlignment="Center" Padding="5">发送</Button>
+            <Button Grid.Row="3" HorizontalAlignment="Center" Padding="5" Click="cmdSendMessage_Click">发送</Button>
         </Grid>
     </Grid>
 </Window>

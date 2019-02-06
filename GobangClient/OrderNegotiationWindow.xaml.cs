@@ -50,6 +50,7 @@ namespace GobangClient
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            this.Title = localAccount;
             rbLocalAccount.Content = localAccount;
 
             // This opponent here means the opponent of the current user.

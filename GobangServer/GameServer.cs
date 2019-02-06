@@ -154,6 +154,9 @@ namespace GobangServer
                             case JsonPackageKeys.Win:
                                 ForwardMatchResult(jsonPackage[JsonPackageKeys.Body]);
                                 break;
+                            case JsonPackageKeys.TextMessage:
+                                ForwardTextMessage(jsonPackage[JsonPackageKeys.Body]);
+                                break;
                         }
                     }
                 }
@@ -411,6 +414,17 @@ namespace GobangServer
             string receiverAccount = matchResult[JsonPackageKeys.Receiver].ToString();
             ClientInfo receiver = FindClientByAccount(receiverAccount);
             Communication.Send(receiver.ClientSocket, JsonPackageKeys.Win, matchResult);
+
+            ClientInfo sender = FindClientByAccount(matchResult[JsonPackageKeys.Sender].ToString());
+            sender.State = ClientState.Idle;
+            receiver.State = ClientState.Idle;
+        }
+
+        private static void ForwardTextMessage(JToken textMessage)
+        {
+            string receiverAccount = textMessage[JsonPackageKeys.Receiver].ToString();
+            ClientInfo receiver = FindClientByAccount(receiverAccount);
+            Communication.Send(receiver.ClientSocket, JsonPackageKeys.TextMessage, textMessage);
         }
     }
 }
