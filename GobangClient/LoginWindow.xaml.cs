@@ -25,12 +25,14 @@ namespace GobangClient
     /// </summary>
     public partial class LoginWindow : Window
     {
+        /// <summary>
+        /// 要传递给服务器的用户信息。
+        /// </summary>
         private AccountInfo accountToCommit;
 
         public LoginWindow()
         {
             InitializeComponent();
-
             accountToCommit = new AccountInfo();
 
             try
@@ -39,7 +41,9 @@ namespace GobangClient
             }
             catch (SocketException e)
             {
+                // 如果服务器没有启动则关闭客户端。
                 MessageBox.Show(e.Message);
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
             }
         }
 

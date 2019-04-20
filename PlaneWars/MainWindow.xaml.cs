@@ -465,7 +465,7 @@ namespace PlaneWars
             // Random generate a number as its startX.
             int startX = random.Next(Settings.EnemyLeftMin, leftMax);
 
-            // Genetate the enemy.
+            // Generate the enemy.
             Enemy enemy = new Enemy(enemyKind, startX, level);
 
             // Add it to the linked list that contains all alive enemies.

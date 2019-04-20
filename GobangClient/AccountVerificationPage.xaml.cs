@@ -27,8 +27,13 @@ namespace GobangClient
             InitializeComponent();
         }
 
+        /// <summary>
+        /// 验证用户与邮箱是否匹配。
+        /// </summary>
+        /// <returns></returns>
         public JObject ValidateMailAddress()
         {
+            // 禁止为空。
             if (txtAccount.Text.Length == 0 || txtMailAddress.Text.Length == 0)
             {
                 return JObject.FromObject(new
@@ -41,6 +46,7 @@ namespace GobangClient
                 });
             }
 
+            // 将用户填写的信息上传给服务器，让服务器进行验证。
             object messageBody = new
             {
                 Account = txtAccount.Text,
@@ -48,6 +54,7 @@ namespace GobangClient
             };
             Communication.Send(JsonPackageKeys.ValidateAccount, messageBody);
 
+            // 获取并返回服务器的验证结果。
             return Communication.ReceiveMessage();
         }
     }

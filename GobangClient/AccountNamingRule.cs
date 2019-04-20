@@ -10,12 +10,20 @@ using System.Windows.Controls;
 
 namespace GobangClient
 {
+    /// <summary>
+    /// 用户名的验证规则。具体规则为：长度3-20个字符，仅允许字母和数字，以字母开头，不允许与已注册用户重复。
+    /// </summary>
     public class AccountNamingRule : ValidationRule
     {
-        // Validates following rules:
-        // 账号即用户名，长度3-20个字符，仅允许字母和数字，以字母开头，不允许与已注册用户重复.
+        /// <summary>
+        /// 验证用户名。
+        /// </summary>
+        /// <param name="value">要验证的值。</param>
+        /// <param name="cultureInfo">地区文化信息。</param>
+        /// <returns>用于表示验证结果的<see cref="ValidationResult" />对象。</returns>
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
+            // 将用户名从object转换成string类型。
             string account = value as string;
 
             if (account == null)

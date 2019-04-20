@@ -24,6 +24,7 @@ namespace GobangClient
     public partial class SearchForMatchWindow : Window
     {
         private string localAccount;
+        private Timer timer;
 
         public JToken FinalMatchInfo { get; private set; }
 
@@ -47,7 +48,7 @@ namespace GobangClient
         // Start to request user lists once the window is loaded.
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            new Timer(RequestUserLists, null, 0, 2000);
+            StartListening();
         }
 
         // Refresh the idle user list and the playing user list every 2 seconds.
@@ -142,9 +143,21 @@ namespace GobangClient
                 //matchListener.CancelAsync();
                 //stopListening = true;
                 this.Hide();
+                timer.Dispose();
                 MainScene.MatchInfo = FinalMatchInfo;
                 MainScene.Show();
             });
+        }
+
+        public void StartListening()
+        {
+            timer = new Timer(RequestUserLists, null, 0, 2000);
+        }
+
+        public new void Show()
+        {
+            base.Show();
+            StartListening();
         }
     }
 }

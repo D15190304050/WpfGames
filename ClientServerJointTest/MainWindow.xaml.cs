@@ -26,11 +26,8 @@ namespace ClientServerJointTest
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ConcurrentQueue<Process> clientProcesses;
-
         public MainWindow()
         {
-            clientProcesses = new ConcurrentQueue<Process>();
             InitializeComponent();
         }
 

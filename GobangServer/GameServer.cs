@@ -270,7 +270,7 @@ namespace GobangServer
             JArray idleUsers = new JArray();
             JArray playingUsers = new JArray();
 
-            ClientInfo[] clientInformation = clientInfos.ToArray();
+            //ClientInfo[] clientInformation = clientInfos.ToArray();
             foreach (ClientInfo client in clientInfos)
             {
                 if (client.State == ClientState.Idle)

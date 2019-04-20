@@ -12,7 +12,7 @@ namespace GobangServer
     // Given that all parameters are validated before passing to methods in this class, parameter validation are no longer needed in this class.
     public static class SqlExecutor
     {
-        private const string ConnectionString = @"Server = DESKTOP-5F10G1P\SQLEXPRESS; User = DinoStark; Password = non-feeling; Database = Gobang;";
+        private const string ConnectionString = @"Server = DESKTOP-5F10G1P\SQLEXPRESS; Integrated Security = True; Database = Gobang;";
 
         public static SqlConnection Connection { get; }
 
