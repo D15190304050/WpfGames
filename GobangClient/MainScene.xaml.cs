@@ -41,7 +41,7 @@ namespace GobangClient
         private bool canPutChessPiece;
         private string opponentAccount;
         private ChessPiece color;
-        
+
         public JToken MatchInfo { get; set; }
 
         public SearchForMatchWindow SearchForMatchWindow { get; set; }
@@ -182,10 +182,20 @@ namespace GobangClient
         {
             if (matchStarted && canPutChessPiece)
             {
-                canPutChessPiece = false;
-
                 // Get the clicked button.
                 Button clickedButton = e.OriginalSource as Button;
+
+                // Get the position of the clicked button.
+                string[] positionTag = clickedButton.Tag.ToString().Split(',');
+                int rowIndex = int.Parse(positionTag[0]);
+                int columnIndex = int.Parse(positionTag[1]);
+
+                // Do nothing if the black-chess-piece player put the chess piece to a forbidden position.
+                if ((color == ChessPiece.Black) && CheckBalanceBreaker(rowIndex, columnIndex))
+                    return;
+
+                // Set the flag, so that this user have moved and should wait for the opponent to move.
+                canPutChessPiece = false;
 
                 // Get the corresponding style.
                 object chessPieceStyle = color == ChessPiece.White
@@ -206,11 +216,6 @@ namespace GobangClient
 
                 // Add the ellipse to the canvas so that it can be seen.
                 chessboardCanvas.Children.Add(chessPieceCircle);
-
-                // Get the position of the clicked button.
-                string[] positionTag = clickedButton.Tag.ToString().Split(',');
-                int rowIndex = int.Parse(positionTag[0]);
-                int columnIndex = int.Parse(positionTag[1]);
 
                 // Set it to null so that GC can free the space when it is free.
                 chessPieceButtons[rowIndex, columnIndex] = null;
@@ -371,7 +376,7 @@ namespace GobangClient
             return CheckRow(rowIndex, columnIndex) || CheckColumn(rowIndex, columnIndex) || CheckMainDiagonal(rowIndex, columnIndex) || CheckAntiDiagonal(rowIndex, columnIndex);
         }
 
-        private bool CheckRow(int rowIndex, int columnIndex)
+        private int RowLineLength(int rowIndex, int columnIndex)
         {
             // Starts from 1 since the given chess piece is also a chess piece having the same color.
             int connectedChessPieces = 1;
@@ -386,11 +391,7 @@ namespace GobangClient
                 if ((adjacentColumnIndex >= 0) &&
                     (adjacentColumnIndex < ChessboardSize) &&
                     (chessboard[rowIndex, adjacentColumnIndex] == color))
-                {
                     connectedChessPieces++;
-                    if (connectedChessPieces == LineSize)
-                        return true;
-                }
                 else
                     break;
             }
@@ -403,19 +404,20 @@ namespace GobangClient
                 if ((adjacentColumnIndex >= 0) &&
                     (adjacentColumnIndex < ChessboardSize) &&
                     (chessboard[rowIndex, adjacentColumnIndex] == color))
-                {
                     connectedChessPieces++;
-                    if (connectedChessPieces == LineSize)
-                        return true;
-                }
                 else
                     break;
             }
 
-            return false;
+            return connectedChessPieces;
         }
 
-        private bool CheckColumn(int rowIndex, int columnIndex)
+        private bool CheckRow(int rowIndex, int columnIndex)
+        {
+            return RowLineLength(rowIndex, columnIndex) >= LineSize;
+        }
+
+        private int ColumnLineLength(int rowIndex, int columnIndex)
         {
             int connectedChessPieces = 1;
             int adjacentRowIndex;
@@ -426,11 +428,7 @@ namespace GobangClient
                 if ((adjacentRowIndex >= 0) &&
                     (adjacentRowIndex < ChessboardSize) &&
                     (chessboard[adjacentRowIndex, columnIndex] == color))
-                {
                     connectedChessPieces++;
-                    if (connectedChessPieces == LineSize)
-                        return true;
-                }
                 else
                     break;
             }
@@ -441,19 +439,20 @@ namespace GobangClient
                 if ((adjacentRowIndex >= 0) &&
                     (adjacentRowIndex < ChessboardSize) &&
                     (chessboard[adjacentRowIndex, columnIndex] == color))
-                {
                     connectedChessPieces++;
-                    if (connectedChessPieces == LineSize)
-                        return true;
-                }
                 else
                     break;
             }
 
-            return false;
+            return connectedChessPieces;
         }
 
-        private bool CheckMainDiagonal(int rowIndex, int columnIndex)
+        private bool CheckColumn(int rowIndex, int columnIndex)
+        {
+            return ColumnLineLength(rowIndex, columnIndex) >= LineSize;
+        }
+
+        private int MainDiagonalLength(int rowIndex, int columnIndex)
         {
             int connectedChessPieces = 1;
             int adjacentRowIndex;
@@ -469,11 +468,7 @@ namespace GobangClient
                     (adjacentColumnIndex >= 0) &&
                     (adjacentColumnIndex < ChessboardSize) &&
                     (chessboard[adjacentRowIndex, adjacentColumnIndex] == color))
-                {
                     connectedChessPieces++;
-                    if (connectedChessPieces == LineSize)
-                        return true;
-                }
                 else
                     break;
             }
@@ -488,19 +483,20 @@ namespace GobangClient
                     (adjacentColumnIndex >= 0) &&
                     (adjacentColumnIndex < ChessboardSize) &&
                     (chessboard[adjacentRowIndex, adjacentColumnIndex] == color))
-                {
                     connectedChessPieces++;
-                    if (connectedChessPieces == LineSize)
-                        return true;
-                }
                 else
                     break;
             }
 
-            return false;
+            return connectedChessPieces;
         }
 
-        private bool CheckAntiDiagonal(int rowIndex, int columnIndex)
+        private bool CheckMainDiagonal(int rowIndex, int columnIndex)
+        {
+            return MainDiagonalLength(rowIndex, columnIndex) >= LineSize;
+        }
+
+        private int AntiDiagonalLength(int rowIndex, int columnIndex)
         {
             int connectedChessPieces = 1;
             int adjacentRowIndex;
@@ -518,11 +514,7 @@ namespace GobangClient
                     (adjacentColumnIndex >= 0) &&
                     (adjacentColumnIndex < ChessboardSize) &&
                     (chessboard[adjacentRowIndex, adjacentColumnIndex] == color))
-                {
                     connectedChessPieces++;
-                    if (connectedChessPieces == LineSize)
-                        return true;
-                }
                 else
                     break;
             }
@@ -539,16 +531,31 @@ namespace GobangClient
                     (adjacentColumnIndex >= 0) &&
                     (adjacentColumnIndex < ChessboardSize) &&
                     (chessboard[adjacentRowIndex, adjacentColumnIndex] == color))
-                {
                     connectedChessPieces++;
-                    if (connectedChessPieces == LineSize)
-                        return true;
-                }
                 else
                     break;
             }
 
-            return false;
+            return connectedChessPieces;
+        }
+
+        private bool CheckAntiDiagonal(int rowIndex, int columnIndex)
+        {
+            return AntiDiagonalLength(rowIndex, columnIndex) >= LineSize;
+        }
+
+        /// <summary>
+        /// Checks if the position the black-chess player put the chess piece will break the game balance.
+        /// </summary>
+        /// <param name="rowIndex"></param>
+        /// <param name="columnIndex"></param>
+        /// <returns></returns>
+        private bool CheckBalanceBreaker(int rowIndex, int columnIndex)
+        {
+            return (RowLineLength(rowIndex, columnIndex) > LineSize) ||
+                   (ColumnLineLength(rowIndex, columnIndex) > LineSize) ||
+                   (MainDiagonalLength(rowIndex, columnIndex) > LineSize) ||
+                   (AntiDiagonalLength(rowIndex, columnIndex) > LineSize);
         }
 
         // A test method.
