@@ -42,12 +42,12 @@ namespace PlaneWars
         /// <summary>
         /// Initializes a new instance of the Line2D class across 2 given points.
         /// </summary>
-        /// <param name="point1">A point that this line ccross.</param>
-        /// <param name="point2">Another point that this line ccross.</param>
+        /// <param name="point1">A point that this line cross.</param>
+        /// <param name="point2">Another point that this line cross.</param>
         public Line2D(Point2D point1, Point2D point2)
         {
             // If point1 and point2 have the same y (or there difference are close to 0), than we can just have line equation as if-branch.
-            // Otherwise, we can obtain the line equation using code in else-branck.
+            // Otherwise, we can obtain the line equation using code in else-branch.
             if (point1.X - point2.X < 1e-5)
             {
                 this.A = 1;
@@ -70,7 +70,7 @@ namespace PlaneWars
         public virtual Point2D GetIntersectionWith(Line2D line2)
         {
             // This implementation uses linear algebra formulas.
-            // denominator here is just the determinant of the cofficient matrix.
+            // denominator here is just the determinant of the coefficient matrix.
 
             double a = this.A;
             double b = this.B;
@@ -98,7 +98,6 @@ namespace PlaneWars
         {
             // Here we calculate the result of the line equation.
             // And we think they are equal if the result is less than 1 * 10 ^ (-5).
-
             double delta = Math.Abs(this.A * x + this.B * y + this.C);
             return delta < 1e-5;
         }
